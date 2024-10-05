@@ -12,7 +12,7 @@ namespace ElectricFieldVis.Controller
         /// </summary>
         static void Main(string[] args)
         {
-            int scenarioNumber = 0;
+            int scenarioNumber = 3;
 
             if (args.Length > 0 && int.TryParse(args[0], out int parsedScenario))
             {
@@ -21,7 +21,7 @@ namespace ElectricFieldVis.Controller
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Application.Run(new MainForm(scenarioNumber));
         }
     }
 }

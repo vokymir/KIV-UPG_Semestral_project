@@ -10,17 +10,19 @@ namespace ElectricFieldVis.Model
     public class Probe
     {
         public Vector2 Position { get; private set; }
+        public float Radius {  get; private set; }
+        private float angularVelocity = (float)(Math.PI / 6); // specified in assignment
 
         public Probe()
         {
-            Position = new Vector2(1f,0f);
+            Radius = 1;
+            Position = new Vector2(Radius,0f);
         }
 
         public void UpdatePosition(float time)
         {
-            float angularVelocity = (float)(Math.PI / 6); // specified in assignment
             float angle = angularVelocity * time;
-            Position = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+            Position = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
         }
 
     }

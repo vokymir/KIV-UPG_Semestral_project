@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Forms;
 
 namespace ElectricFieldVis.View
@@ -18,7 +19,6 @@ namespace ElectricFieldVis.View
             ClientSize = new Size(800, 600);
             _renderer = renderer;
             DoubleBuffered = true;
-            MinimumSize = new Size(800, 600);
 
         }
 

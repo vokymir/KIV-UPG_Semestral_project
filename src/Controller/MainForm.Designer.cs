@@ -49,7 +49,7 @@ namespace ElectricFieldVis.Controller
             Controls.Add(drawingPanel);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "<Osobní číslo> - Semestrální práce KIV/UPG 2024/2025";
+            Text = "A23B0235P - Semestrální práce KIV/UPG 2024/2025";
             ResumeLayout(false);
         }
 

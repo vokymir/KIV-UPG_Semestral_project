@@ -20,6 +20,8 @@ namespace ElectricFieldVis.Controller
             initializeView();
             InitializeComponent();
             initializeController();
+
+            MinimumSize = new Size(800, 600);
         }
 
         private void initializeModel(int scenarioNumber)
@@ -47,7 +49,7 @@ namespace ElectricFieldVis.Controller
             _timeElapsed += deltaTime;
 
             _probe.UpdatePosition(_timeElapsed);
-            this.Invalidate();
+            drawingPanel.Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)

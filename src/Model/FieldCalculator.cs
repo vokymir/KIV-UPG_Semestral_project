@@ -11,9 +11,9 @@ namespace ElectricFieldVis.Model
     {
         private const float K = 8.988e9f;
 
-        public static Vector2 CalculateField(Vector2 point, List<Particle> particles)
+        public static Vector2 CalculateFieldDirection(Vector2 point, List<Particle> particles)
         {
-            Vector2 field = new Vector2(0, 0);
+            Vector2 direction = new Vector2(0, 0);
 
             foreach (Particle particle in particles)
             {
@@ -32,13 +32,21 @@ namespace ElectricFieldVis.Model
                 float ex = dx / distance;
                 float ey = dy / distance;
 
-                field.X += fieldMagnitude * ex;
-                field.Y += fieldMagnitude * ey;
+                direction.X += fieldMagnitude * ex;
+                direction.Y += fieldMagnitude * ey;
             }
 
-            field *= K;
+            direction *= K;
 
-            return field;
+            return direction;
+        }
+
+        public static float CalculateFieldIntensity(Vector2 direction)
+        {
+            float intensitySquared = direction.X * direction.X + direction.Y * direction.Y;
+            float intensity = (float)Math.Sqrt(intensitySquared);
+
+            return intensity;
         }
     }
 }
