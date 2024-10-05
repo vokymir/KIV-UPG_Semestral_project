@@ -26,7 +26,7 @@ namespace UPG_SP_2024
 
             //TODO: Add custom paint code here
 
-            g.FillEllipse(Brushes.Red, this.Width / 2 - 50, this.Height / 2 - 50, 100, 100);
+            g.FillEllipse(Brushes.Red, this.Width / 2, this.Height / 4, 100, 100);
 
             // Calling the base class OnPaint
             base.OnPaint(e);
