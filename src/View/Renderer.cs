@@ -17,15 +17,16 @@ namespace ElectricFieldVis.View
         private Vector2 origin;
         System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red);
 
-        public Renderer(List<Particle> particles, Probe probe)
+        public Renderer(List<Particle> particles, Probe probe, Size clientSize)
         {
             this._particles = particles;
             this._mainProbe = probe;
             this.scale = 1.0f;
             this.origin = Vector2.Zero;
+            UpdateOnResize(clientSize);
         }
 
-        public void Render(Graphics g, Size clientSize)
+        public void UpdateOnResize(Size clientSize)
         {
             float minX = 0;
             float minY = 0;
@@ -51,8 +52,11 @@ namespace ElectricFieldVis.View
             float scaleY = clientSize.Height / (maxY - minY + padding);
             scale = Math.Min(scaleX, scaleY);
 
-            origin = new Vector2( (clientSize.Width / 2), (clientSize.Height / 2));
+            origin = new Vector2((clientSize.Width / 2), (clientSize.Height / 2));
+        }
 
+        public void Render(Graphics g, Size clientSize)
+        {
             foreach (Particle particle in _particles)
             {
                 DrawParticle(g, particle);
@@ -112,9 +116,9 @@ namespace ElectricFieldVis.View
             using (Brush textBrush = new SolidBrush(Color.Black))
             using (Font font = new Font("Serif", scale * 0.1f))
             {
-                string chargeLabel = $"{energy.ToString():+0;-0}";
+                string chargeLabel = $"{energy.ToString():+0;-0} C";
                 SizeF textSize = g.MeasureString(chargeLabel, font);
-                g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY + textSize.Height / 2);
+                g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY - textSize.Height);
             }
         }
 

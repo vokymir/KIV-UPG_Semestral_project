@@ -42,6 +42,11 @@ namespace ElectricFieldVis.View
         /// <param name="eventargs">An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.</param>
         protected override void OnResize(EventArgs eventargs)
         {
+            if (_renderer != null)
+            {
+                _renderer.UpdateOnResize(ClientSize);
+            }
+
             Invalidate();  //ensure repaint
 
             base.OnResize(eventargs);

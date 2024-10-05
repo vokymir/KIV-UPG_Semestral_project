@@ -32,7 +32,7 @@ namespace ElectricFieldVis.Controller
 
         private void initializeView()
         {
-            _renderer = new Renderer(_particles, _probe);
+            _renderer = new Renderer(_particles, _probe, this.ClientSize);
         }
 
         private void initializeController()
