@@ -1,7 +1,8 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
+using ElectricFieldVis.View;
 
-namespace UPG_SP_2024
+namespace ElectricFieldVis.Controller
 {
     partial class MainForm
     {
@@ -31,7 +32,7 @@ namespace UPG_SP_2024
         /// </summary>
         private void InitializeComponent()
         {
-            drawingPanel = new DrawingPanel();
+            drawingPanel = new DrawingPanel(_renderer);
             SuspendLayout();
             // 
             // drawingPanel

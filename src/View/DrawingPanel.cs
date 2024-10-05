@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace UPG_SP_2024
+namespace ElectricFieldVis.View
 {
 
     /// <summary>
@@ -10,10 +10,16 @@ namespace UPG_SP_2024
     /// </summary>
     public class DrawingPanel : Panel
     {
+        private Renderer _renderer;
+
         /// <summary>Initializes a new instance of the <see cref="DrawingPanel" /> class.</summary>
-        public DrawingPanel()
+        public DrawingPanel(Renderer renderer)
         {
-            this.ClientSize = new System.Drawing.Size(800, 600);
+            ClientSize = new Size(800, 600);
+            _renderer = renderer;
+            DoubleBuffered = true;
+            MinimumSize = new Size(800, 600);
+
         }
 
 
@@ -24,12 +30,10 @@ namespace UPG_SP_2024
         {
             Graphics g = e.Graphics;
 
-            //TODO: Add custom paint code here
-
-            g.FillEllipse(Brushes.Red, this.Width / 2, this.Height / 4, 100, 100);
-
             // Calling the base class OnPaint
             base.OnPaint(e);
+
+            _renderer.Render(g,ClientSize);
         }
 
         /// <summary>
@@ -38,7 +42,7 @@ namespace UPG_SP_2024
         /// <param name="eventargs">An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.</param>
         protected override void OnResize(EventArgs eventargs)
         {
-            this.Invalidate();  //ensure repaint
+            Invalidate();  //ensure repaint
 
             base.OnResize(eventargs);
         }
