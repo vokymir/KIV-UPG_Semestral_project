@@ -53,6 +53,7 @@ namespace ElectricFieldVis.View
             scale = Math.Min(scaleX, scaleY);
 
             origin = new Vector2((clientSize.Width / 2), (clientSize.Height / 2));
+
         }
 
         public void Render(Graphics g, Size clientSize)
@@ -101,9 +102,13 @@ namespace ElectricFieldVis.View
             Vector2 direction = FieldCalculator.CalculateFieldDirection(probe.Position, _particles);
             float energy = FieldCalculator.CalculateFieldIntensity(direction);
 
-            float arrowLength = 1 / (scale * 10000000);
-            direction.X *= arrowLength;
-            direction.Y *= arrowLength * -1;
+            if (energy > 0)
+            {
+                
+                float arrowLength = scale;
+                direction.X = (direction.X / energy) * arrowLength;
+                direction.Y = (direction.Y / energy) * arrowLength * -1;
+            }
 
             using (Brush brush = new SolidBrush(probeColor))
             {
@@ -116,7 +121,7 @@ namespace ElectricFieldVis.View
             using (Brush textBrush = new SolidBrush(Color.Black))
             using (Font font = new Font("Serif", scale * 0.1f))
             {
-                string chargeLabel = $"{energy.ToString():+0;-0} C";
+                string chargeLabel = $"{energy.ToString():+0;-0} N/C";
                 SizeF textSize = g.MeasureString(chargeLabel, font);
                 g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY - textSize.Height);
             }
