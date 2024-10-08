@@ -106,8 +106,9 @@ namespace ElectricFieldVis.View
             {
                 
                 float arrowLength = scale;
-                direction.X = (direction.X / energy) * arrowLength;
-                direction.Y = (direction.Y / energy) * arrowLength * -1;
+                float divisor = 1E11f;
+                direction.X = (direction.X / divisor) * arrowLength;
+                direction.Y = (direction.Y / divisor) * arrowLength * -1;
             }
 
             using (Brush brush = new SolidBrush(probeColor))

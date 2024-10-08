@@ -5,41 +5,31 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace ElectricFieldVis.Controller
 {
     public class Scenario
     {
+        public List<Particle>? particles { get; set; }
+        public Scenario() { }
         public static List<Particle> LoadScenario(int scenarioNumber)
         {
-            switch (scenarioNumber)
+            string filename = $"Scenarios/{scenarioNumber}.json";
+            string jsonString = File.ReadAllText(filename);
+            Scenario scenario = new Scenario();
+            try
             {
-                case 1:
-                    return new List<Particle>
-                    {
-                        new Particle(-1f, 0f, 1f),
-                    new Particle(1f, 0f, 1f)
-                };
-                case 2:
-                    return new List<Particle>
-                    {
-                    new Particle(-1f, 0f, -1f),
-                    new Particle(1f, 0f, 2f)
-                };
-                case 3:
-                    return new List<Particle>
-                    {
-                    new Particle(-1f, -1f, 1f),
-                    new Particle(1f, -1f, 2f),
-                    new Particle(1f, 1f, -3f),
-                    new Particle(-1f, 1f, -4f)
-                };
-                default:
-                    return new List<Particle>
-                {
-                    new Particle(0f, 0f, 1f)
-                };
+                scenario = JsonSerializer.Deserialize<Scenario>(jsonString);
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Application.Exit();
+            }
+
+
+            return scenario.particles;
         }
     }
 }
