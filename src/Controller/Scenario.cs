@@ -9,27 +9,90 @@ using System.Text.Json;
 
 namespace ElectricFieldVis.Controller
 {
+    /// <summary>
+    /// In charge of loading and saving scenarios. The attributes depends on the extensions I will make.
+    /// </summary>
     public class Scenario
     {
         public List<Particle>? particles { get; set; }
         public Scenario() { }
-        public static List<Particle> LoadScenario(int scenarioNumber)
+
+        /// <summary>
+        /// Load the desired scenario, or default scenario 0 if there is any problem. Log the problem to Console.
+        /// </summary>
+        /// <param name="scenarioName">Name of the desired scenario</param>
+        /// <returns>Complete scenario.</returns>
+        public static Scenario LoadScenario(string scenarioName)
         {
-            string filename = $"Scenarios/{scenarioNumber}.json";
-            string jsonString = File.ReadAllText(filename);
+            string filename = $"Scenarios/{scenarioName}.json";
+            string jsonString;
+
+            // catch invalid filename
+            try
+            {
+                jsonString = File.ReadAllText(filename);
+            }
+            catch
+            {
+                
+                return Scenario.DefaultLoad($"File for desired scenario not found.\n> Scenario name:\n{scenarioName}");
+            }
+            
             Scenario scenario = new Scenario();
+
+            // catch invalid JSON
             try
             {
                 scenario = JsonSerializer.Deserialize<Scenario>(jsonString);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Application.Exit();
+                scenario = Scenario.DefaultLoad($"Failed to parse the scenario file.\n> Filename:\n{filename}\n> Content of scenario file:\n{jsonString}\n> Error message:\n{ex.Message}");
             }
 
+            // check if scenario is valid
+            if (scenario == null)
+            {
+                scenario = Scenario.DefaultLoad("Scenario wasn't loaded properly (null).");
+            }
 
-            return scenario.particles;
+            // check if scenario has all attributes. If not, DEFAULT load.
+            if (scenario.particles == null)
+            {
+                scenario = Scenario.DefaultLoad("Scenario wasn't loaded properly (particles null).");
+            }
+
+            return scenario;
+        }
+
+        /// <summary>
+        /// Load the default scenario. Call this function if any error.
+        /// </summary>
+        /// <param name="message">Message explaining why loading default.</param>
+        /// <param name="showMessage">Should show the message?</param>
+        /// <returns>The whole scenario, no matter how it will be structured in the future.</returns>
+        private static Scenario DefaultLoad(string message, bool showMessage = true)
+        {
+            if (showMessage)
+            {
+                MessageBox.Show($"{message}\nRunning default scenario instead.");
+            }
+            string defaultScenarioName = "0";
+
+            // catch any weird errors and exit
+            try
+            {
+                string filename = $"Scenarios/{defaultScenarioName}.json";
+                string jsonString = File.ReadAllText(filename);
+                Scenario scenario = JsonSerializer.Deserialize<Scenario>(jsonString);
+                return scenario;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unknown error while trying DefaultLoad. Exiting now.\n> Error message:\n{ex.Message}");
+                Environment.Exit(1);
+                return null;
+            }
         }
     }
 }

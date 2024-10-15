@@ -9,19 +9,20 @@ namespace ElectricFieldVis.Controller
     {
         /// <summary>
         ///  The main entry point for the application.
+        ///  Parses arguments from command line and starts the application.
         /// </summary>
         static void Main(string[] args)
         {
-            int scenarioNumber = 3;
+            string scenarioName = "0";
 
-            if (args.Length > 0 && int.TryParse(args[0], out int parsedScenario))
+            if (args.Length > 0)
             {
-                scenarioNumber = parsedScenario;
+                scenarioName = args[0];
             }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm(scenarioNumber));
+            Application.Run(new MainForm(scenarioName));
         }
     }
 }

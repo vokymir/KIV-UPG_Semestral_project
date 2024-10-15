@@ -23,7 +23,7 @@ namespace ElectricFieldVis.View
         }
 
 
-        /// <summary>TODO: Custom visualization code comes into this method</summary>
+        /// <summary>Calls the _renderer to render.</summary>
         /// <remarks>Raises the <see cref="E:System.Windows.Forms.Control.Paint">Paint</see> event.</remarks>
         /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs">PaintEventArgs</see> that contains the event data.</param>
         protected override void OnPaint(PaintEventArgs e)
@@ -37,7 +37,7 @@ namespace ElectricFieldVis.View
         }
 
         /// <summary>
-        /// Fires the event indicating that the panel has been resized. Inheriting controls should use this in favor of actually listening to the event, but should still call <span class="keyword">base.onResize</span> to ensure that the event is fired for external listeners.
+        /// Fires the event indicating that the panel has been resized. Inheriting controls use this in favor of actually listening to the event, but still call <span class="keyword">base.onResize</span> to ensure that the event is fired for external listeners.
         /// </summary>
         /// <param name="eventargs">An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.</param>
         protected override void OnResize(EventArgs eventargs)

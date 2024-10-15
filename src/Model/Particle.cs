@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ElectricFieldVis.Model
 {
+    /// <summary>
+    /// For storing all information about one Particle.
+    /// </summary>
     public class Particle
     {
         public float X {  get; set; }

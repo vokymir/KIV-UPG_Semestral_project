@@ -12,46 +12,75 @@ namespace ElectricFieldVis.Controller
         private Probe _probe;
         private System.Windows.Forms.Timer _timer;
         private float _timeElapsed = 0f;
+        private float _lastUpdateTime = 0f;
         private int _fps = 30;
 
-        public MainForm(int scenarioNumber = 0)
+        /// <summary>
+        /// Init MainForms components - Model, View, Controller and WinForm itself.
+        /// </summary>
+        /// <param name="scenarioName">Name of the desired scenario.</param>
+        public MainForm(string scenarioName = "0")
         {
-            initializeModel(scenarioNumber);
-            initializeView();
+            InitializeModel(scenarioName);
+            InitializeView();
             InitializeComponent();
-            initializeController();
+            InitializeController();
 
-            MinimumSize = new Size(800, 600);
+            this.Size = new Size(800, 600);
+            MinimumSize = new Size(100, 100 + SystemInformation.CaptionHeight);
         }
 
-        private void initializeModel(int scenarioNumber)
+        /// <summary>
+        /// Init Model by loading scenario and creating new main Probe.
+        /// </summary>
+        /// <param name="scenarioName">Name of the desired scenario.</param>
+        private void InitializeModel(string scenarioName)
         {
-            _particles = Scenario.LoadScenario(scenarioNumber);
+            Scenario scenario = Scenario.LoadScenario(scenarioName);
+            _particles = scenario.particles;
             _probe = new Probe();
         }
 
-        private void initializeView()
+        /// <summary>
+        /// Init View by creating Renderer with all particles and probe.
+        /// </summary>
+        private void InitializeView()
         {
             _renderer = new Renderer(_particles, _probe, this.ClientSize);
         }
 
-        private void initializeController()
+        /// <summary>
+        /// Init Controller by starting timer.
+        /// </summary>
+        private void InitializeController()
         {
             _timer = new System.Windows.Forms.Timer();
             _timer.Interval = 1000 / _fps;
-            _timer.Tick += onTimerTick;
+            _timer.Tick += OnTimerTick;
             _timer.Start();
         }
 
-        private void onTimerTick(object sender, EventArgs e)
+        /// <summary>
+        /// Update the frame every time it is called.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnTimerTick(object? sender, EventArgs e)
         {
-            float deltaTime = 1f / _fps;
+            float currentTime = Environment.TickCount / 1000f; // time in seconds
+            float deltaTime = currentTime - _lastUpdateTime;
+            _lastUpdateTime = currentTime;
+
             _timeElapsed += deltaTime;
 
             _probe.UpdatePosition(_timeElapsed);
             drawingPanel.Invalidate();
         }
 
+        /// <summary>
+        /// Paint and render.
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);

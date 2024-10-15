@@ -1,1 +1,3 @@
-"./bin/ElectricFieldVis.exe" %*
+cd bin
+ElectricFieldVis.exe %*
+cd ..
