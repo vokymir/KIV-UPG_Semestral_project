@@ -2,7 +2,7 @@
   "profiles": {
     "ElectricFieldVis": {
       "commandName": "Project",
-      "commandLineArgs": "0"
+      "commandLineArgs": "3"
     }
   }
 }

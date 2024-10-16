@@ -153,8 +153,8 @@ namespace ElectricFieldVis.View
 
                 arrowLength = Math.Clamp(arrowLength, minArrowLength, maxArrowLength);
 
-                direction.X = (direction.X / energy) * arrowLength;
-                direction.Y = (direction.Y / energy) * arrowLength * -1;
+                direction.X = (direction.X / energy) * arrowLength * -1;
+                direction.Y = (direction.Y / energy) * arrowLength;
 
             }
 
@@ -170,9 +170,20 @@ namespace ElectricFieldVis.View
             using (Brush textBrush = new SolidBrush(Color.Black))
             using (Font font = new Font("Serif", _scale * 0.1f))
             {
-                string chargeLabel = $"{energy.ToString():+0;-0} N/C";
+                string chargeLabel = $"{energy.ToString("G3")} N/C";
                 SizeF textSize = g.MeasureString(chargeLabel, font);
-                g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY - textSize.Height);
+
+                // draw value background
+                Rectangle rectangle = new Rectangle(
+                    (int)(screenX - textSize.Width / 2),
+                    (int)(screenY + textSize.Height / 2),
+                    (int)(textSize.Width),
+                    (int)(textSize.Height)
+                    );
+                g.FillRectangle(new SolidBrush(Color.FromArgb(128, 255, 255, 255)), rectangle);
+
+                // draw text
+                g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY + textSize.Height / 2);
             }
         }
 
