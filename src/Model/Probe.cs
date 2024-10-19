@@ -14,14 +14,18 @@ namespace ElectricFieldVis.Model
     /// </summary>
     public class Probe
     {
-        public Vector2 Position { get; private set; }
-        public float Radius {  get; private set; }
-        private float _angularVelocity = (float)(Math.PI / 6); // specified in assignment
+        public Vector2 position { get; private set; }
+        public float radius {  get; private set; }
+        public float angularVelocity { get; private set; }  
+        public Color color { get; set; }
 
         public Probe()
         {
-            Radius = 1;
-            Position = new Vector2(Radius,0f);
+            // setting default values specified in assignment
+            radius = 1;
+            position = new Vector2(radius,0f);
+            angularVelocity = (float)(Math.PI / 6); 
+            color = Color.Black;
         }
 
         /// <summary>
@@ -30,8 +34,8 @@ namespace ElectricFieldVis.Model
         /// <param name="time">Time elapsed since the beginning.</param>
         public void UpdatePosition(float time)
         {
-            float angle = _angularVelocity * time;
-            Position = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+            float angle = angularVelocity * time;
+            position = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
         }
 
     }

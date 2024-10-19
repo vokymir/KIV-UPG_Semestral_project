@@ -14,6 +14,7 @@ namespace ElectricFieldVis.Controller
         private float _timeElapsed = 0f;
         private float _lastUpdateTime = 0f;
         private int _fps = 30;
+        private StatsForm _statsForm;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -28,6 +29,12 @@ namespace ElectricFieldVis.Controller
 
             this.Size = new Size(800, 600);
             MinimumSize = new Size(100, 100 + SystemInformation.CaptionHeight);
+
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(MainForm_KeyDown);
+
+            InitializeOtherWindows();
+            CreateMenu();
         }
 
         /// <summary>
@@ -60,6 +67,42 @@ namespace ElectricFieldVis.Controller
             _timer.Start();
         }
 
+        private void InitializeOtherWindows()
+        {
+            if (_statsForm == null || _statsForm.IsDisposed)
+            {
+                _statsForm = new StatsForm(_probe.color); // Pass the current arrow color to StatsForm
+
+                // Subscribe to the ColorChanged event from StatsForm
+                _statsForm.ColorChanged += UpdateProbeColor;
+
+                _statsForm.Show();
+            }
+        }
+
+        private void CreateMenu()
+        {
+            MenuStrip menu = new MenuStrip();
+            this.MainMenuStrip = menu;
+            this.Controls.Add(menu);
+
+            ToolStripMenuItem first = new ToolStripMenuItem("Stats");
+            first.Click += Click_stats;
+
+            menu.Items.Add(first);
+        }
+
+        private void Click_stats(object? sender, EventArgs e)
+        {
+            InitializeOtherWindows();
+        }
+
+        private void UpdateProbeColor(Color newColor)
+        {
+            _probe.color = newColor;
+            Invalidate(); // Redraw the arrow with the new color
+        }
+
         /// <summary>
         /// Update the frame every time it is called.
         /// </summary>
@@ -85,6 +128,11 @@ namespace ElectricFieldVis.Controller
         {
             base.OnPaint(e);
             _renderer.Render(e.Graphics,this.ClientSize);
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            Utils.HandleCtrlW(this, e);
         }
     }
 }

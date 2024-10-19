@@ -55,10 +55,10 @@ namespace ElectricFieldVis.View
                 if (particle.Y > maxY) maxY = particle.Y;
             }
 
-            maxX = Math.Max(_mainProbe.Radius, maxX);
-            minX = Math.Min(-1 * _mainProbe.Radius, minX);
-            maxY = Math.Max(_mainProbe.Radius, maxY);
-            minY = Math.Min(-1 * _mainProbe.Radius, minY);
+            maxX = Math.Max(_mainProbe.radius, maxX);
+            minX = Math.Min(-1 * _mainProbe.radius, minX);
+            maxY = Math.Max(_mainProbe.radius, maxY);
+            minY = Math.Min(-1 * _mainProbe.radius, minY);
 
             // add padding to edges of screen, so the biggest particles don't touch the edge
             float padding = 2;
@@ -132,13 +132,13 @@ namespace ElectricFieldVis.View
         private void DrawProbe(Graphics g, Probe probe)
         {
             // translating into render coordinates
-            float screenX = _origin.X + probe.Position.X * _scale;
-            float screenY = _origin.Y - probe.Position.Y * _scale;
+            float screenX = _origin.X + probe.position.X * _scale;
+            float screenY = _origin.Y - probe.position.Y * _scale;
 
-            Color probeColor = Color.Black;
+            Color probeColor = probe.color;
 
             // find the current force direction and energy of the Probe (arrow)
-            Vector2 direction = FieldCalculator.CalculateFieldDirection(probe.Position, _particles);
+            Vector2 direction = FieldCalculator.CalculateFieldDirection(probe.position, _particles);
             float energy = FieldCalculator.CalculateFieldIntensity(direction);
 
             // dynamic arrow length

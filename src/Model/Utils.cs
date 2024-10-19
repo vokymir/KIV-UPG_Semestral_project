@@ -10,8 +10,14 @@ namespace ElectricFieldVis.Model
     /// For many things but thankfully I was able to avoid using it every time I almost did use it.
     /// That's why it is here even though unused.
     /// </summary>
-    public class Utility
+    public class Utils
     {
-        
+        public static void HandleCtrlW(Form form, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.W)
+            {
+                form.Close(); // Close the passed form when Ctrl+W is pressed
+            }
+        }
     }
 }
