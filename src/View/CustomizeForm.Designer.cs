@@ -1,6 +1,6 @@
 ﻿namespace ElectricFieldVis.View
 {
-    partial class StatsForm
+    partial class CustomizerForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,46 @@
         /// </summary>
         private void InitializeComponent()
         {
-            
+            colorDialog1 = new ColorDialog();
+            ProbeColor = new Button();
+            label1 = new Label();
+            SuspendLayout();
             // 
-            // StatsForm
+            // ProbeColor
+            // 
+            ProbeColor.Location = new Point(86, 16);
+            ProbeColor.Name = "ProbeColor";
+            ProbeColor.Size = new Size(48, 15);
+            ProbeColor.TabIndex = 0;
+            ProbeColor.UseVisualStyleBackColor = true;
+            ProbeColor.Click += btnProbeColor_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(12, 16);
+            label1.Name = "label1";
+            label1.Size = new Size(68, 15);
+            label1.TabIndex = 1;
+            label1.Text = "Probe color";
+            // 
+            // CustomizerForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Name = "StatsForm";
-            Text = "Statistics";
+            Controls.Add(label1);
+            Controls.Add(ProbeColor);
+            Name = "CustomizerForm";
+            Text = "Customizer";
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
+        private ColorDialog colorDialog1;
+        private Button ProbeColor;
+        private Label label1;
     }
 }

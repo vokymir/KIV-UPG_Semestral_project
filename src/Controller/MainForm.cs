@@ -15,6 +15,7 @@ namespace ElectricFieldVis.Controller
         private float _lastUpdateTime = 0f;
         private int _fps = 30;
         private StatsForm _statsForm;
+        private CustomizerForm _customizerForm;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -34,7 +35,7 @@ namespace ElectricFieldVis.Controller
             this.KeyDown += new KeyEventHandler(MainForm_KeyDown);
 
             InitializeOtherWindows();
-            CreateMenu();
+            
         }
 
         /// <summary>
@@ -69,14 +70,29 @@ namespace ElectricFieldVis.Controller
 
         private void InitializeOtherWindows()
         {
+            CreateMenu();
+        }
+
+        private void ShowStatsForm()
+        {
             if (_statsForm == null || _statsForm.IsDisposed)
             {
-                _statsForm = new StatsForm(_probe.color); // Pass the current arrow color to StatsForm
-
-                // Subscribe to the ColorChanged event from StatsForm
-                _statsForm.ColorChanged += UpdateProbeColor;
+                _statsForm = new StatsForm();
 
                 _statsForm.Show();
+            }
+        }
+
+        private void ShowCustomizerForm()
+        {
+            if (_customizerForm == null || _customizerForm.IsDisposed)
+            {
+                _customizerForm = new CustomizerForm(_probe.color);
+
+                // Subscribe to the ColorChanged event
+                _customizerForm.ColorChanged += UpdateProbeColor;
+
+                _customizerForm.Show();
             }
         }
 
@@ -86,15 +102,24 @@ namespace ElectricFieldVis.Controller
             this.MainMenuStrip = menu;
             this.Controls.Add(menu);
 
-            ToolStripMenuItem first = new ToolStripMenuItem("Stats");
-            first.Click += Click_stats;
+            ToolStripMenuItem stats = new ToolStripMenuItem("Stats");
+            ToolStripMenuItem customizer = new ToolStripMenuItem("Customize");
 
-            menu.Items.Add(first);
+            stats.Click += Click_stats;
+            customizer.Click += Click_custom;
+
+            menu.Items.Add(stats);
+            menu.Items.Add(customizer);
+        }
+
+        private void Click_custom(object? sender, EventArgs e)
+        {
+            ShowCustomizerForm();
         }
 
         private void Click_stats(object? sender, EventArgs e)
         {
-            InitializeOtherWindows();
+            ShowStatsForm();
         }
 
         private void UpdateProbeColor(Color newColor)
