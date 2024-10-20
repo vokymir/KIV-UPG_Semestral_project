@@ -74,6 +74,32 @@ namespace ElectricFieldVis.View
         }
 
         /// <summary>
+        /// Translate real-life coordinates into drawing coordinates.
+        /// </summary>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
+        /// <returns>Vector2(X, Y)</returns>
+        private Vector2 TranslateCoordinates(float x, float y)
+        {
+            return TranslateCoordinates(new Vector2(x, y));
+        }
+
+        /// <summary>
+        /// Translate real-life coordinates into drawing coordinates.
+        /// </summary>
+        /// <param name="realWorldCoords">Vector2(X, Y)</param>
+        /// <returns>Vector2(X, Y)</returns>
+        private Vector2 TranslateCoordinates(Vector2 realWorldCoords)
+        {
+            float x = _origin.X + realWorldCoords.X * _scale;
+            float y = _origin.Y - realWorldCoords.Y * _scale;
+            
+            Vector2 drawingCoords = new Vector2(x,y);
+
+            return drawingCoords;
+        }
+
+        /// <summary>
         /// Main rendering loop. Renders all Particles and Probe.
         /// </summary>
         /// <param name="g"></param>
@@ -96,8 +122,7 @@ namespace ElectricFieldVis.View
         private void DrawParticle(Graphics g, Particle particle)
         {
             // translate coordinates to drawing coordinates
-            float screenX = _origin.X + particle.X * _scale;
-            float screenY = _origin.Y - particle.Y * _scale;
+            Vector2 particleCoords = TranslateCoordinates(particle.X, particle.Y);
 
             // set sizes
             float baseRadius = 0.1f * _scale;
@@ -110,7 +135,7 @@ namespace ElectricFieldVis.View
             // draw the particle
             using (Brush brush = new SolidBrush(particleColor))
             {
-                g.FillEllipse(brush,screenX - radius, screenY - radius, radius * 2, radius * 2);
+                g.FillEllipse(brush, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
             }
 
             // write a value next to (currently on the top) the particle
@@ -119,7 +144,7 @@ namespace ElectricFieldVis.View
             {
                 string chargeLabel = $"{particle.Value:+0;-0} C";
                 SizeF textSize = g.MeasureString(chargeLabel,font);
-                g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY - radius - textSize.Height);
+                g.DrawString(chargeLabel, font, textBrush, particleCoords.X - textSize.Width / 2, particleCoords.Y - radius - textSize.Height);
             }
 
         }
@@ -132,8 +157,7 @@ namespace ElectricFieldVis.View
         private void DrawProbe(Graphics g, Probe probe)
         {
             // translating into render coordinates
-            float screenX = _origin.X + probe.position.X * _scale;
-            float screenY = _origin.Y - probe.position.Y * _scale;
+            Vector2 probeCoords = TranslateCoordinates(probe.position);
 
             Color probeColor = probe.color;
 
@@ -163,7 +187,7 @@ namespace ElectricFieldVis.View
             {
                 Pen pen = new Pen(brush, _scale * 0.05f);
                 pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
-                g.DrawLine(pen,new PointF(screenX,screenY),new PointF(screenX + direction.X, screenY + direction.Y));
+                g.DrawLine(pen,new PointF(probeCoords),new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
             }
 
             // draw value text
@@ -175,15 +199,15 @@ namespace ElectricFieldVis.View
 
                 // draw value background
                 Rectangle rectangle = new Rectangle(
-                    (int)(screenX - textSize.Width / 2),
-                    (int)(screenY + textSize.Height / 2),
+                    (int)(probeCoords.X - textSize.Width / 2),
+                    (int)(probeCoords.Y + textSize.Height / 2),
                     (int)(textSize.Width),
                     (int)(textSize.Height)
                     );
                 g.FillRectangle(new SolidBrush(Color.FromArgb(128, 255, 255, 255)), rectangle);
 
                 // draw text
-                g.DrawString(chargeLabel, font, textBrush, screenX - textSize.Width / 2, screenY + textSize.Height / 2);
+                g.DrawString(chargeLabel, font, textBrush, probeCoords.X - textSize.Width / 2, probeCoords.Y + textSize.Height / 2);
             }
         }
 
