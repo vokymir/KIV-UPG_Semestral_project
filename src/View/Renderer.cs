@@ -19,6 +19,10 @@ namespace ElectricFieldVis.View
         private Probe _mainProbe;
         private float _scale;
         private Vector2 _origin;
+        private CustomizerForm? _customizerForm;
+        private bool _particleDynamicWidth = true;
+        private Color _particlePositiveColor = Color.Red;
+        private Color _particleNegativeColor = Color.Blue;
 
         /// <summary>
         /// Init the rendere and also set correct scaling.
@@ -32,6 +36,7 @@ namespace ElectricFieldVis.View
             this._mainProbe = probe;
             this._scale = 1.0f;
             this._origin = Vector2.Zero;
+
             UpdateOnResize(clientSize);
         }
 
@@ -99,6 +104,57 @@ namespace ElectricFieldVis.View
             return drawingCoords;
         }
 
+        public void ShowCustomizerForm()
+        {
+            if (_customizerForm == null || _customizerForm.IsDisposed)
+            {
+                _customizerForm = new CustomizerForm(_mainProbe.color);
+
+                // Subscribe to the ColorChanged event
+                _customizerForm.ProbeColorChanged += UpdateProbeColor;
+                _customizerForm.ParticleDynamicWidthChecked += UpdateParticleDynamicWidth;
+                _customizerForm.ParticlePositiveColorChanged += UpdateParticlePositiveColor;
+                _customizerForm.ParticleNegativeColorChanged += UpdateParticleNegativeColor;
+
+
+                _customizerForm.Show();
+            }
+        }
+
+        private void UpdateParticleNegativeColor(Color color)
+        {
+            _particleNegativeColor = color;
+        }
+
+        private void UpdateParticlePositiveColor(Color color)
+        {
+            _particlePositiveColor = color;
+        }
+
+        private void UpdateParticleDynamicWidth(bool obj)
+        {
+            _particleDynamicWidth = obj;
+        }
+
+        private void UpdateProbeColor(Color color)
+        {
+            _mainProbe.color = color;
+        }
+
+        /// <summary>
+        /// Main rendering loop. Renders all Particles and Probe.
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="clientSize"></param>
+        public void Render(Graphics g, Size clientSize, Vector2 probeDirection)
+        {
+            foreach (Particle particle in _particles)
+            {
+                DrawParticle(g, particle);
+            }
+
+            DrawProbe(g, _mainProbe, probeDirection);
+        }
         /// <summary>
         /// Main rendering loop. Renders all Particles and Probe.
         /// </summary>
@@ -126,11 +182,17 @@ namespace ElectricFieldVis.View
 
             // set sizes
             float baseRadius = 0.1f * _scale;
-            float radius = baseRadius * (float)(1 + Math.Log( Math.Abs(particle.Value)));
+            float radius = baseRadius;
+            
+            if (_particleDynamicWidth)
+            {
+                radius *= (float)(1 + Math.Log(Math.Abs(particle.Value)));
+            }
+            
             float fontSize = baseRadius;
 
             // set color, blue if negative value, red if positive
-            Color particleColor = particle.Value > 0 ? Color.Red : Color.Blue;
+            Color particleColor = particle.Value > 0 ? _particlePositiveColor : _particleNegativeColor;
 
             // draw the particle
             using (Brush brush = new SolidBrush(particleColor))
@@ -156,13 +218,24 @@ namespace ElectricFieldVis.View
         /// <param name="probe">Probe to draw.</param>
         private void DrawProbe(Graphics g, Probe probe)
         {
+            Vector2 probeDir = FieldCalculator.CalculateFieldDirection(probe.position, _particles);
+            DrawProbe(g, probe, probeDir);
+        }
+
+        /// <summary>
+        /// Draw the main Probe as an arrow and text with it's value.
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="probe">Probe to draw.</param>
+        /// <param name="direction">Direction of the probe.</param>
+        private void DrawProbe(Graphics g, Probe probe, Vector2 direction)
+        {
             // translating into render coordinates
             Vector2 probeCoords = TranslateCoordinates(probe.position);
 
             Color probeColor = probe.color;
 
-            // find the current force direction and energy of the Probe (arrow)
-            Vector2 direction = FieldCalculator.CalculateFieldDirection(probe.position, _particles);
+            // find the current energy of the Probe (arrow)
             float energy = FieldCalculator.CalculateFieldIntensity(direction);
 
             // dynamic arrow length

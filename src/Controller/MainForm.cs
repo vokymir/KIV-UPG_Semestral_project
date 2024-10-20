@@ -1,6 +1,7 @@
 using ElectricFieldVis.Model;
 using ElectricFieldVis.View;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Forms;
 
 namespace ElectricFieldVis.Controller
@@ -15,7 +16,6 @@ namespace ElectricFieldVis.Controller
         private float _lastUpdateTime = 0f;
         private int _fps = 30;
         private StatsForm _statsForm;
-        private CustomizerForm _customizerForm;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -83,19 +83,6 @@ namespace ElectricFieldVis.Controller
             }
         }
 
-        private void ShowCustomizerForm()
-        {
-            if (_customizerForm == null || _customizerForm.IsDisposed)
-            {
-                _customizerForm = new CustomizerForm(_probe.color);
-
-                // Subscribe to the ColorChanged event
-                _customizerForm.ColorChanged += UpdateProbeColor;
-
-                _customizerForm.Show();
-            }
-        }
-
         private void CreateMenu()
         {
             MenuStrip menu = new MenuStrip();
@@ -114,7 +101,7 @@ namespace ElectricFieldVis.Controller
 
         private void Click_custom(object? sender, EventArgs e)
         {
-            ShowCustomizerForm();
+            _renderer.ShowCustomizerForm();
         }
 
         private void Click_stats(object? sender, EventArgs e)
@@ -143,6 +130,20 @@ namespace ElectricFieldVis.Controller
 
             _probe.UpdatePosition(_timeElapsed);
             drawingPanel.Invalidate();
+
+            Vector2 probeDir = FieldCalculator.CalculateFieldDirection(_probe.position, _particles);
+            UpdateStatsForm(probeDir);
+        }
+
+        public void UpdateStatsForm(Vector2 probeDir)
+        {
+            if (_statsForm == null)
+            {
+                return;
+            }
+
+            _statsForm.UpdateProbeCoords(_probe.position);
+            _statsForm.UpdateProbeDirection(probeDir);
         }
 
         /// <summary>
@@ -152,7 +153,9 @@ namespace ElectricFieldVis.Controller
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+            
             _renderer.Render(e.Graphics,this.ClientSize);
+            
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)

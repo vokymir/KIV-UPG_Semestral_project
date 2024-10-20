@@ -13,10 +13,15 @@ namespace ElectricFieldVis.View
 {
     public partial class CustomizerForm : Form
     {
-        // Declare the event. It will notify subscribers when the color changes.
-        public event Action<Color> ColorChanged;
+        // Declare events
+        public event Action<Color> ProbeColorChanged;
+        public event Action<Boolean> ParticleDynamicWidthChecked;
+        public event Action<Color> ParticlePositiveColorChanged;
+        public event Action<Color> ParticleNegativeColorChanged;
 
         private Color _probeColor;
+        private Color _particlePositiveColor = Color.Red;
+        private Color _particleNegativeColor = Color.Blue;
 
 
         public CustomizerForm(Color probeColor)
@@ -25,7 +30,9 @@ namespace ElectricFieldVis.View
 
             InitializeComponent();
 
-            set_btnProbeColor();
+            set_btnColor(ProbeColor, _probeColor);
+            set_btnColor(ParticlePositiveColor, _particlePositiveColor);
+            set_btnColor(ParticleNegativeColor, _particleNegativeColor);
 
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(CustomizerForm_KeyDown);
@@ -44,17 +51,56 @@ namespace ElectricFieldVis.View
                     // Update the selected color and display it
                     _probeColor = colorDialog.Color;
 
-                    set_btnProbeColor();
+                    set_btnColor(ProbeColor, _probeColor);
 
                     // Raise the event to notify subscribers of the color change
-                    ColorChanged?.Invoke(_probeColor);
+                    ProbeColorChanged?.Invoke(_probeColor);
                 }
             }
         }
 
-        private void set_btnProbeColor()
+        private void set_btnColor(Button obj, Color clr)
         {
-            ProbeColor.BackColor = _probeColor;
+            obj.BackColor = clr;
+        }
+
+        private void ParticleDynamicWidth_CheckedChanged(object sender, EventArgs e)
+        {
+            ParticleDynamicWidthChecked?.Invoke(ParticleDynamicWidth.Checked);
+        }
+
+        private void ParticlePositiveColor_Click(object sender, EventArgs e)
+        {
+            using (ColorDialog colorDialog = new ColorDialog())
+            {
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Update the selected color and display it
+                    _particlePositiveColor = colorDialog.Color;
+
+                    set_btnColor(ParticlePositiveColor, _particlePositiveColor);
+
+                    // Raise the event to notify subscribers of the color change
+                    ParticlePositiveColorChanged?.Invoke(_particlePositiveColor);
+                }
+            }
+        }
+
+        private void ParticleNegativeColor_Click(object sender, EventArgs e)
+        {
+            using (ColorDialog colorDialog = new ColorDialog())
+            {
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Update the selected color and display it
+                    _particleNegativeColor = colorDialog.Color;
+
+                    set_btnColor(ParticleNegativeColor, _particleNegativeColor);
+
+                    // Raise the event to notify subscribers of the color change
+                    ParticleNegativeColorChanged?.Invoke(_particleNegativeColor);
+                }
+            }
         }
     }
 }
