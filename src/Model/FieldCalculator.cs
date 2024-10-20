@@ -30,6 +30,8 @@ namespace ElectricFieldVis.Model
             {
                 float dx = particle.X - point.X;
                 float dy = particle.Y - point.Y;
+                //float dx = point.X - particle.X;
+                //float dy = point.Y - particle.Y;
                 float distanceSquared = dx * dx + dy * dy;
                 float distance = (float)Math.Sqrt(distanceSquared);
 

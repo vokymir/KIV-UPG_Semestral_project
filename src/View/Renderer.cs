@@ -250,8 +250,8 @@ namespace ElectricFieldVis.View
 
                 arrowLength = Math.Clamp(arrowLength, minArrowLength, maxArrowLength);
 
-                direction.X = (direction.X / energy) * arrowLength * -1;
-                direction.Y = (direction.Y / energy) * arrowLength;
+                direction.X = (direction.X / energy) * arrowLength;
+                direction.Y = (direction.Y / energy) * arrowLength * -1;
 
             }
 
