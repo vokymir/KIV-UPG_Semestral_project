@@ -30,6 +30,8 @@ namespace ElectricFieldVis.Controller
 
             this.Size = new Size(800, 600);
             MinimumSize = new Size(100, 100 + SystemInformation.CaptionHeight);
+            this.Location = new Point(300, 0);
+            this.StartPosition = FormStartPosition.Manual;
 
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(MainForm_KeyDown);

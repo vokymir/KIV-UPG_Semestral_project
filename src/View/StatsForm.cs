@@ -20,6 +20,10 @@ namespace ElectricFieldVis.View
         {
             InitializeComponent();
 
+            this.Size = new Size(300, 300);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new Point(0, 0);
+
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(StatsForm_KeyDown);
         }

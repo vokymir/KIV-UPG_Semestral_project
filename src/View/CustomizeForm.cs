@@ -30,6 +30,10 @@ namespace ElectricFieldVis.View
 
             InitializeComponent();
 
+            this.Size = new Size(300, 300);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new Point(0, 300);
+
             set_btnColor(ProbeColor, _probeColor);
             set_btnColor(ParticlePositiveColor, _particlePositiveColor);
             set_btnColor(ParticleNegativeColor, _particleNegativeColor);
