@@ -24,11 +24,19 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
 
 
-        public CustomizerForm(Color probeColor)
+        /// <summary>
+        /// Customize the visual aspect of an app.
+        /// </summary>
+        /// <param name="probeColor">Color of the Probe, to set it.</param>
+        public CustomizerForm(Color probeColor, Color particlePositiveColor, Color particleNegativeColor, bool particleDynamicWidth)
         {
             _probeColor = probeColor;
+            _particlePositiveColor = particlePositiveColor;
+            _particleNegativeColor = particleNegativeColor;
 
             InitializeComponent();
+
+            ParticleDynamicWidth.Checked = particleDynamicWidth;
 
             this.Size = new Size(300, 300);
             this.StartPosition = FormStartPosition.Manual;

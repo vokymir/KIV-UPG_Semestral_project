@@ -11,6 +11,7 @@ namespace ElectricFieldVis.Model
     /// </summary>
     public class Particle
     {
+        // now I know I could use Vector2, but instead I have these two attributes X,Y
         public float X {  get; set; }
         public float Y { get; set; }
         public float Value { get; set; }

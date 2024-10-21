@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 namespace ElectricFieldVis.Model
 {
     /// <summary>
-    /// For many things but thankfully I was able to avoid using it every time I almost did use it.
-    /// That's why it is here even though unused.
+    /// For many things I do not know where to put.
     /// </summary>
     public class Utils
     {
+        /// <summary>
+        /// Close the specified form via CTRL + W.
+        /// </summary>
+        /// <param name="form">Form to close.</param>
+        /// <param name="e"></param>
         public static void HandleCtrlW(Form form, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.W)

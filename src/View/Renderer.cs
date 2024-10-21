@@ -40,6 +40,8 @@ namespace ElectricFieldVis.View
             UpdateOnResize(clientSize);
         }
 
+        #region CalculateAndTranslate
+
         /// <summary>
         /// Updating the scaling parameters on resize
         /// </summary>
@@ -106,42 +108,30 @@ namespace ElectricFieldVis.View
             return drawingCoords;
         }
 
-        public void ShowCustomizerForm()
+        /// <summary>
+        /// Calculate the radius of a particle in real-life units. To convert to drawing-units multiply by _scale.
+        /// </summary>
+        /// <param name="particle">The particle to calculate radius to.</param>
+        /// <returns>The radius in real-life units.</returns>
+        private float CalculateParticleRadius(Particle particle)
         {
-            if (_customizerForm == null || _customizerForm.IsDisposed)
+            float baseRadius = 0.1f;
+
+            if (_particleDynamicWidth)
             {
-                _customizerForm = new CustomizerForm(_mainProbe.color);
-
-                // Subscribe to the ColorChanged event
-                _customizerForm.ProbeColorChanged += UpdateProbeColor;
-                _customizerForm.ParticleDynamicWidthChecked += UpdateParticleDynamicWidth;
-                _customizerForm.ParticlePositiveColorChanged += UpdateParticlePositiveColor;
-                _customizerForm.ParticleNegativeColorChanged += UpdateParticleNegativeColor;
-
-
-                _customizerForm.Show();
+                return baseRadius * (float)(1 + Math.Log(1 + Math.Abs(particle.Value)));
+            }
+            else
+            {
+                return baseRadius;
             }
         }
 
-        private void UpdateParticleNegativeColor(Color color)
-        {
-            _particleNegativeColor = color;
-        }
 
-        private void UpdateParticlePositiveColor(Color color)
-        {
-            _particlePositiveColor = color;
-        }
+        #endregion CalculateAndTranslate
 
-        private void UpdateParticleDynamicWidth(bool obj)
-        {
-            _particleDynamicWidth = obj;
-        }
 
-        private void UpdateProbeColor(Color color)
-        {
-            _mainProbe.color = color;
-        }
+        #region Draw
 
         /// <summary>
         /// Main rendering loop. Renders all Particles and Probe.
@@ -172,18 +162,7 @@ namespace ElectricFieldVis.View
             DrawProbe(g, _mainProbe);
         }
 
-        private float CalculateParticleRadius(Particle particle)
-        {
-            float baseRadius = 0.1f;
-
-            if(_particleDynamicWidth) {
-                return baseRadius * (float)(1 + Math.Log(1 + Math.Abs(particle.Value)));
-            }
-            else
-            {
-                return baseRadius;
-            }
-        }
+        
 
         /// <summary>
         /// Draw one particle as filled elipse with text value and color distinction for plus and minus.
@@ -293,7 +272,51 @@ namespace ElectricFieldVis.View
             }
         }
 
-       
+        #endregion Draw
+
+
+        #region CustomizerForm
+        // Create customizer form and subscribe and handle to all its Events.
+
+        public void ShowCustomizerForm()
+        {
+            if (_customizerForm == null || _customizerForm.IsDisposed)
+            {
+                _customizerForm = new CustomizerForm(_mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth);
+
+                // Subscribe to the ColorChanged event
+                _customizerForm.ProbeColorChanged += UpdateProbeColor;
+                _customizerForm.ParticleDynamicWidthChecked += UpdateParticleDynamicWidth;
+                _customizerForm.ParticlePositiveColorChanged += UpdateParticlePositiveColor;
+                _customizerForm.ParticleNegativeColorChanged += UpdateParticleNegativeColor;
+
+
+                _customizerForm.Show();
+            }
+        }
+
+        private void UpdateParticleNegativeColor(Color color)
+        {
+            _particleNegativeColor = color;
+        }
+
+        private void UpdateParticlePositiveColor(Color color)
+        {
+            _particlePositiveColor = color;
+        }
+
+        private void UpdateParticleDynamicWidth(bool obj)
+        {
+            _particleDynamicWidth = obj;
+        }
+
+        private void UpdateProbeColor(Color color)
+        {
+            _mainProbe.color = color;
+        }
+
+        #endregion CustomizerForm
+
 
     }
 }

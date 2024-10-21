@@ -12,7 +12,9 @@ namespace ElectricFieldVis.Model
     /// </summary>
     public class FieldCalculator
     {
-        private const float K = 8.988e9f;
+        // the constant when multiplying the summa in CalculateFieldDirection function
+        // 1/(4 * PI * e_0)
+        private const float K = (float)(1f / ( 4f * (float)Math.PI * 8.854E-12));
 
         /// <summary>
         /// Calculate the direction of the force for the point with given particles.
@@ -24,13 +26,18 @@ namespace ElectricFieldVis.Model
         {
             Vector2 direction = new Vector2(0, 0);
 
-            // follow the formula from the assignment for better understanding: https://courseware.zcu.cz/CoursewarePortlets2/DownloadDokumentu?id=238441
+            // follow the formula from the assignment for better understanding: Project_folder > doc > Zadani_semestralni_prace_KIV_UPG_2024_2025.pdf
             // this is the SUMMA part
             foreach (Particle particle in particles)
             {
+                // x - x_i
                 float dx = point.X - particle.X;
                 float dy = point.Y - particle.Y;
+                
+                // || x - x_i ||^2
                 float distanceSquared = dx * dx + dy * dy;
+
+                // || x - x_i ||
                 float distance = (float)Math.Sqrt(distanceSquared);
 
                 // won't divide by zero
@@ -39,16 +46,21 @@ namespace ElectricFieldVis.Model
                     continue;
                 }
 
+                // q_i / || x - x_i ||^2
                 float fieldMagnitude = particle.Value / distanceSquared;
 
+                // (x - x_i) / || x - x_i ||
                 float ex = dx / distance;
                 float ey = dy / distance;
 
+                // add to summa: [ q_i / || x - x_i ||^2 ] * [ (x - x_i) / || x - x_i || ]
+                // which is what we want
                 direction.X += fieldMagnitude * ex;
                 direction.Y += fieldMagnitude * ey;
             }
 
             // this is the multiplication of the summa
+            // 1/(4 * PI * e_0) * Summa
             direction *= K;
 
             return direction;

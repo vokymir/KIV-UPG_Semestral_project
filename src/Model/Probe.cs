@@ -17,6 +17,8 @@ namespace ElectricFieldVis.Model
         public Vector2 position { get; private set; }
         public float radius {  get; private set; }
         public float angularVelocity { get; private set; }  
+
+        // doesn't really belongs here for the data, but for the visual representation
         public Color color { get; set; }
 
         public Probe()

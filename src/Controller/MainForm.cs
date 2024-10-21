@@ -16,6 +16,7 @@ namespace ElectricFieldVis.Controller
         private float _lastUpdateTime = 0f;
         private int _fps = 30;
         private StatsForm _statsForm;
+        private MenuStrip _menuStrip;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -28,15 +29,16 @@ namespace ElectricFieldVis.Controller
             InitializeComponent();
             InitializeController();
 
+            InitializeOtherWindows();
+
             this.Size = new Size(800, 600);
-            MinimumSize = new Size(100, 100 + SystemInformation.CaptionHeight);
+            MinimumSize = new Size(100, 100 + SystemInformation.CaptionHeight + _menuStrip.Size.Height);
             this.Location = new Point(300, 0);
             this.StartPosition = FormStartPosition.Manual;
 
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(MainForm_KeyDown);
 
-            InitializeOtherWindows();
             
         }
 
@@ -87,9 +89,9 @@ namespace ElectricFieldVis.Controller
 
         private void CreateMenu()
         {
-            MenuStrip menu = new MenuStrip();
-            this.MainMenuStrip = menu;
-            this.Controls.Add(menu);
+            _menuStrip = new MenuStrip();
+            this.MainMenuStrip = _menuStrip;
+            this.Controls.Add(_menuStrip);
 
             ToolStripMenuItem stats = new ToolStripMenuItem("Stats");
             ToolStripMenuItem customizer = new ToolStripMenuItem("Customize");
@@ -97,8 +99,8 @@ namespace ElectricFieldVis.Controller
             stats.Click += Click_stats;
             customizer.Click += Click_custom;
 
-            menu.Items.Add(stats);
-            menu.Items.Add(customizer);
+            _menuStrip.Items.Add(stats);
+            _menuStrip.Items.Add(customizer);
         }
 
         private void Click_custom(object? sender, EventArgs e)
