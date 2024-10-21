@@ -53,11 +53,13 @@ namespace ElectricFieldVis.View
             float maxY = 0;
 
             foreach (Particle particle in _particles)
-            {   // not considering the particle radius
-                if (particle.X < minX) minX = particle.X;
-                if (particle.Y < minY) minY = particle.Y;
-                if (particle.X > maxX) maxX = particle.X;
-                if (particle.Y > maxY) maxY = particle.Y;
+            {
+                float particleRadius = CalculateParticleRadius(particle);
+
+                if (particle.X - particleRadius < minX) { minX = particle.X - particleRadius; };
+                if (particle.Y - particleRadius < minY) { minY = particle.Y - particleRadius; };
+                if (particle.X + particleRadius > maxX) { maxX = particle.X + particleRadius; };
+                if (particle.Y + particleRadius > maxY) { maxY = particle.Y + particleRadius; };
             }
 
             maxX = Math.Max(_mainProbe.radius, maxX);
@@ -65,8 +67,8 @@ namespace ElectricFieldVis.View
             maxY = Math.Max(_mainProbe.radius, maxY);
             minY = Math.Min(-1 * _mainProbe.radius, minY);
 
-            // add padding to edges of screen, so the biggest particles don't touch the edge
-            float padding = 2;
+            // add padding to edges of screen, because of labels and toolbars
+            float padding = 1;
 
             // get the correct scale
             float scaleX = clientSize.Width / (maxX - minX + padding);
@@ -170,6 +172,19 @@ namespace ElectricFieldVis.View
             DrawProbe(g, _mainProbe);
         }
 
+        private float CalculateParticleRadius(Particle particle)
+        {
+            float baseRadius = 0.1f;
+
+            if(_particleDynamicWidth) {
+                return baseRadius * (float)(1 + Math.Log(1 + Math.Abs(particle.Value)));
+            }
+            else
+            {
+                return baseRadius;
+            }
+        }
+
         /// <summary>
         /// Draw one particle as filled elipse with text value and color distinction for plus and minus.
         /// </summary>
@@ -181,15 +196,9 @@ namespace ElectricFieldVis.View
             Vector2 particleCoords = TranslateCoordinates(particle.X, particle.Y);
 
             // set sizes
-            float baseRadius = 0.1f * _scale;
-            float radius = baseRadius;
+            float radius = CalculateParticleRadius(particle) * _scale;
             
-            if (_particleDynamicWidth)
-            {
-                radius *= (float)(1 + Math.Log(Math.Abs(particle.Value)));
-            }
-            
-            float fontSize = baseRadius;
+            float fontSize = 0.1f * _scale;
 
             // set color, blue if negative value, red if positive
             Color particleColor = particle.Value > 0 ? _particlePositiveColor : _particleNegativeColor;
