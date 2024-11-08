@@ -17,12 +17,42 @@ namespace ElectricFieldVis.View
     {
         private List<Particle> _particles;
         private Probe _mainProbe;
-        private float _scale;
-        private Vector2 _origin;
         private CustomizerForm? _customizerForm;
         private bool _particleDynamicWidth = true;
         private Color _particlePositiveColor = Color.Red;
         private Color _particleNegativeColor = Color.Blue;
+        private Size _curr_client_size = new Size(800, 600);
+
+        private Vector2 _origin = Vector2.Zero;
+        public Vector2 Origin
+        {
+            get
+            {
+                return _origin;
+            }
+            set
+            {
+                _origin = value;
+            }
+        }
+
+
+        private float _scale = 1f;
+        public float Scale
+        {
+            get
+            {
+                return _scale;
+            }
+            set
+            {
+                float new_scale = _scale + value;
+                if (new_scale > 0)
+                {
+                    _scale = new_scale;
+                }
+            }
+        }
 
         /// <summary>
         /// Init the rendere and also set correct scaling.
@@ -34,10 +64,10 @@ namespace ElectricFieldVis.View
         {
             this._particles = particles;
             this._mainProbe = probe;
-            this._scale = 1.0f;
-            this._origin = Vector2.Zero;
 
-            UpdateOnResize(clientSize);
+            _curr_client_size = clientSize;
+
+            InitWindow(clientSize);
         }
 
         #region CalculateAndTranslate
@@ -46,8 +76,21 @@ namespace ElectricFieldVis.View
         /// Updating the scaling parameters on resize
         /// </summary>
         /// <param name="clientSize"></param>
-        public void UpdateOnResize(Size clientSize)
+        public void InitWindow(Size clientSize)
         {
+            ScaleToFill(clientSize);
+
+            CenterOrigin(clientSize);
+        }
+        public void ScaleToFill(Size? clientSize = null)
+        {
+            if (clientSize == null)
+            {
+                clientSize = _curr_client_size;
+            }
+
+            Size clSize = (Size)clientSize;
+
             // finding the min and max values in both axis
             float minX = 0;
             float minY = 0;
@@ -73,13 +116,57 @@ namespace ElectricFieldVis.View
             float padding = 1;
 
             // get the correct scale
-            float scaleX = clientSize.Width / (maxX - minX + padding);
-            float scaleY = clientSize.Height / (maxY - minY + padding);
+            float scaleX = clSize.Width / (maxX - minX + padding);
+            float scaleY = clSize.Height / (maxY - minY + padding);
             _scale = Math.Min(scaleX, scaleY);
+        }
+        public void CenterOrigin(Size? clientSize = null)
+        {
+            if (clientSize == null)
+            {
+                clientSize = _curr_client_size;
+            }
+
+            Size clSize = (Size)clientSize;
 
             // set origin to the middle of the screen
-            _origin = new Vector2((clientSize.Width / 2), (clientSize.Height / 2));
+            _origin = new Vector2((clSize.Width / 2), (clSize.Height / 2));
+        }
 
+        public void ResizeWindow(Size newClientSize)
+        {
+            float change_ratio_W = (float)newClientSize.Width / _curr_client_size.Width;
+            float change_ratio_H = (float)newClientSize.Height / _curr_client_size.Height;
+
+            _origin.X *= change_ratio_W;
+            _origin.Y *= change_ratio_H;
+
+            /*
+            // the scaling should probably stay the same, this were my tries to get it done
+            float scale_ratio = 1f;
+
+            if (change_ratio_H > 1 && change_ratio_W > 1)
+            {
+                scale_ratio = Math.Min(change_ratio_W, change_ratio_H);
+            }
+            else if (change_ratio_H < 1 && change_ratio_W < 1)
+            {
+                scale_ratio = Math.Max(change_ratio_W, change_ratio_H);
+            }
+            // comment from here
+            else if (change_ratio_H > 1 && change_ratio_W < 1)
+            {
+                scale_ratio = change_ratio_W;
+            }
+            else if (change_ratio_H < 1 && change_ratio_W > 1)
+            {
+                scale_ratio = change_ratio_W;
+            }
+            // to here - this was my last try, but it got bigger scale overtime
+            _scale *= scale_ratio;
+            */
+
+            _curr_client_size = newClientSize;
         }
 
         /// <summary>
@@ -139,7 +226,8 @@ namespace ElectricFieldVis.View
         /// <param name="g"></param>
         /// <param name="clientSize"></param>
         public void Render(Graphics g, Size clientSize, Vector2 probeDirection)
-        {
+        { 
+
             foreach (Particle particle in _particles)
             {
                 DrawParticle(g, particle);
@@ -160,6 +248,8 @@ namespace ElectricFieldVis.View
             }
 
             DrawProbe(g, _mainProbe);
+
+            DrawOrigin(g);
         }
 
         
@@ -272,6 +362,12 @@ namespace ElectricFieldVis.View
             }
         }
 
+        private void DrawOrigin(Graphics g)
+        {
+            int biggnes = (int)(_scale * 0.1);
+            g.FillEllipse(Brushes.Brown,new Rectangle((int)(_origin.X - biggnes/2),(int)(_origin.Y - biggnes/2),biggnes,biggnes));
+        }
+
         #endregion Draw
 
 
@@ -289,10 +385,21 @@ namespace ElectricFieldVis.View
                 _customizerForm.ParticleDynamicWidthChecked += UpdateParticleDynamicWidth;
                 _customizerForm.ParticlePositiveColorChanged += UpdateParticlePositiveColor;
                 _customizerForm.ParticleNegativeColorChanged += UpdateParticleNegativeColor;
+                _customizerForm.ZoomLevelChanged += UpdateZoomLevel;
 
 
                 _customizerForm.Show();
             }
+        }
+
+        private float _zooming_factor = 1f;
+        public float ZoomingFactor
+        {
+            get { return _zooming_factor; }
+        }
+        private void UpdateZoomLevel(int new_zoom)
+        {
+            _zooming_factor = 1f * new_zoom;
         }
 
         private void UpdateParticleNegativeColor(Color color)

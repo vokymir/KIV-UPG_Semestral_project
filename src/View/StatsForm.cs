@@ -50,5 +50,18 @@ namespace ElectricFieldVis.View
             ProbeDirection.Text = text;
         }
 
+        public void UpdateOriginPos(Vector2 origin)
+        {
+            string text = $"Origin Position\nX = {origin.X}\nY = {origin.Y}";
+
+            OriginPosition.Text = text;
+        }
+
+        public void UpdateZoom(float zoom)
+        {
+            string text = $"Zoom\n{zoom}";
+
+            ZoomLevel.Text = text;
+        }
     }
 }

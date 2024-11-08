@@ -24,6 +24,8 @@ namespace ElectricFieldVis.Controller
         /// <param name="scenarioName">Name of the desired scenario.</param>
         public MainForm(string scenarioName = "0")
         {
+            this.Size = new Size(800, 600);
+
             InitializeModel(scenarioName);
             InitializeView();
             InitializeComponent();
@@ -31,16 +33,20 @@ namespace ElectricFieldVis.Controller
 
             InitializeOtherWindows();
 
-            this.Size = new Size(800, 600);
             MinimumSize = new Size(100, 100 + SystemInformation.CaptionHeight + _menuStrip.Size.Height);
             this.Location = new Point(300, 0);
             this.StartPosition = FormStartPosition.Manual;
 
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(MainForm_KeyDown);
-
-            
+            this.drawingPanel.MouseDown += MainForm_MouseDown;
+            this.drawingPanel.MouseMove += MainForm_MouseMove;
+            this.drawingPanel.MouseUp += MainForm_MouseUp;
+            this.drawingPanel.MouseWheel += MainForm_MouseWheel;
         }
+
+
+        #region init
 
         /// <summary>
         /// Init Model by loading scenario and creating new main Probe.
@@ -77,6 +83,10 @@ namespace ElectricFieldVis.Controller
             CreateMenu();
         }
 
+        #endregion init
+
+        #region menu
+
         private void ShowStatsForm()
         {
             if (_statsForm == null || _statsForm.IsDisposed)
@@ -93,14 +103,37 @@ namespace ElectricFieldVis.Controller
             this.MainMenuStrip = _menuStrip;
             this.Controls.Add(_menuStrip);
 
+            // TOP-level
             ToolStripMenuItem stats = new ToolStripMenuItem("Stats");
             ToolStripMenuItem customizer = new ToolStripMenuItem("Customize");
+            ToolStripMenuItem help = new ToolStripMenuItem("Helper");
+
+            // HELP-submenu
+            ToolStripMenuItem center = new ToolStripMenuItem("Center");
+            ToolStripMenuItem scale_to_fit = new ToolStripMenuItem("Scale To Fit");
+            help.DropDownItems.AddRange([center, scale_to_fit]);
+
 
             stats.Click += Click_stats;
             customizer.Click += Click_custom;
 
+            center.Click += Click_center;
+            scale_to_fit.Click += Click_scale_to_fit;
+
             _menuStrip.Items.Add(stats);
             _menuStrip.Items.Add(customizer);
+            _menuStrip.Items.Add(help);
+            
+        }
+
+        private void Click_scale_to_fit(object? sender, EventArgs e)
+        {
+            _renderer.ScaleToFill();
+        }
+
+        private void Click_center(object? sender, EventArgs e)
+        {
+            _renderer.CenterOrigin();
         }
 
         private void Click_custom(object? sender, EventArgs e)
@@ -119,6 +152,24 @@ namespace ElectricFieldVis.Controller
             Invalidate(); // Redraw the arrow with the new color
         }
 
+        public void UpdateStatsForm()
+        {
+            if (_statsForm == null)
+            {
+                return;
+            }
+            Vector2 probeDir = FieldCalculator.CalculateFieldDirection(_probe.position, _particles);
+
+            _statsForm.UpdateProbeCoords(_probe.position);
+            _statsForm.UpdateProbeDirection(probeDir);
+            _statsForm.UpdateOriginPos(_renderer.Origin);
+            _statsForm.UpdateZoom(_renderer.Scale);
+        }
+
+        #endregion menu
+
+        #region time
+
         /// <summary>
         /// Update the frame every time it is called.
         /// </summary>
@@ -134,20 +185,8 @@ namespace ElectricFieldVis.Controller
 
             _probe.UpdatePosition(_timeElapsed);
             drawingPanel.Invalidate();
-
-            Vector2 probeDir = FieldCalculator.CalculateFieldDirection(_probe.position, _particles);
-            UpdateStatsForm(probeDir);
-        }
-
-        public void UpdateStatsForm(Vector2 probeDir)
-        {
-            if (_statsForm == null)
-            {
-                return;
-            }
-
-            _statsForm.UpdateProbeCoords(_probe.position);
-            _statsForm.UpdateProbeDirection(probeDir);
+            
+            UpdateStatsForm();
         }
 
         /// <summary>
@@ -162,9 +201,55 @@ namespace ElectricFieldVis.Controller
             
         }
 
+        #endregion time
+
+        #region interactivity
+
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             Utils.HandleCtrlW(this, e);
+            Utils.HandleKeyboard(this,_renderer,e);
         }
+
+        private Vector2 _map_position_before = Vector2.Zero;
+        private bool _moving_map = false;
+        private void MainForm_MouseDown(object? sender, MouseEventArgs e)
+        {
+            // if nothing else is hit TODO
+            _moving_map = true;
+            _map_position_before = new Vector2(e.X, e.Y);
+        }
+        private void MainForm_MouseUp(object? sender, MouseEventArgs e)
+        {
+            _moving_map = false;
+        }
+
+        private void MainForm_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (_moving_map)
+            {
+                Vector2 map_position_now = new Vector2(e.X, e.Y);
+                Vector2 difference =  map_position_now - _map_position_before;
+                _renderer.Origin = _renderer.Origin + difference;
+                _map_position_before = map_position_now;
+            }
+        }
+        private bool _zooming = false;
+        private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            if (!_zooming && e.Delta > 0)
+            {
+                _zooming = true;
+                _renderer.Scale = _renderer.ZoomingFactor;
+                _zooming = false;
+            }else if (!_zooming && e.Delta < 0)
+            {
+                _zooming = true;
+                _renderer.Scale = - 1 * _renderer.ZoomingFactor;
+                _zooming = false;
+            }
+        }
+
+        #endregion interactivity
     }
 }

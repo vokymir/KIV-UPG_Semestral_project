@@ -44,7 +44,7 @@ namespace ElectricFieldVis.View
         {
             if (_renderer != null)
             {
-                _renderer.UpdateOnResize(ClientSize);
+                _renderer.ResizeWindow(ClientSize);
             }
 
             Invalidate();  //ensure repaint

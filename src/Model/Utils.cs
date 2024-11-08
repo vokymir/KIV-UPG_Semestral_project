@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ElectricFieldVis.View;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +23,14 @@ namespace ElectricFieldVis.Model
             if (e.Control && e.KeyCode == Keys.W)
             {
                 form.Close(); // Close the passed form when Ctrl+W is pressed
+            }
+        }
+
+        public static void HandleKeyboard(Form form, Renderer rend, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.Right)
+            {
+                rend.Origin = new Vector2(rend.Origin.X + 50, rend.Origin.Y);
             }
         }
     }

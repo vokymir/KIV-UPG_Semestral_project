@@ -18,6 +18,7 @@ namespace ElectricFieldVis.View
         public event Action<Boolean> ParticleDynamicWidthChecked;
         public event Action<Color> ParticlePositiveColorChanged;
         public event Action<Color> ParticleNegativeColorChanged;
+        public event Action<int> ZoomLevelChanged;
 
         private Color _probeColor;
         private Color _particlePositiveColor = Color.Red;
@@ -113,6 +114,12 @@ namespace ElectricFieldVis.View
                     ParticleNegativeColorChanged?.Invoke(_particleNegativeColor);
                 }
             }
+        }
+
+        private void ZoomFactorBar_ValueChanged(object sender, EventArgs e)
+        {
+            int level = ZoomFactorBar.Value;
+            ZoomLevelChanged?.Invoke(level);
         }
     }
 }
