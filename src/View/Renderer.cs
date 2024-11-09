@@ -248,8 +248,6 @@ namespace ElectricFieldVis.View
             }
 
             DrawProbe(g, _mainProbe);
-
-            DrawOrigin(g);
         }
 
         
@@ -362,6 +360,10 @@ namespace ElectricFieldVis.View
             }
         }
 
+        /// <summary>
+        /// OBSOLETE - only for debug.
+        /// </summary>
+        /// <param name="g"></param>
         private void DrawOrigin(Graphics g)
         {
             int biggnes = (int)(_scale * 0.1);
@@ -425,5 +427,10 @@ namespace ElectricFieldVis.View
         #endregion CustomizerForm
 
 
+        #region Grid
+
+
+
+        #endregion Grid
     }
 }
