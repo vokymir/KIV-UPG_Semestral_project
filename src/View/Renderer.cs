@@ -499,8 +499,11 @@ namespace ElectricFieldVis.View
             Pen pen = new Pen(Color.Black, 5);
             pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
 
-            Vector2 endHere = new Vector2(here.X + vect.X, here.Y + vect.Y);
-            g.DrawLine(pen, here, endHere);
+            float len = 0.1f * _scale;
+
+            Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y + vect.Y / intensity * len));
+
+            g.DrawLine(pen, here,endHere);
             g.FillEllipse(Brushes.Green, new Rectangle(here, new Size(10, 10)));
         }
 
