@@ -167,6 +167,8 @@ namespace ElectricFieldVis.View
             */
 
             _curr_client_size = newClientSize;
+
+            _grid_points = CalculateGridPoints();
         }
 
         /// <summary>
@@ -195,6 +197,8 @@ namespace ElectricFieldVis.View
             return drawingCoords;
         }
 
+        
+
         /// <summary>
         /// Calculate the radius of a particle in real-life units. To convert to drawing-units multiply by _scale.
         /// </summary>
@@ -220,21 +224,7 @@ namespace ElectricFieldVis.View
 
         #region Draw
 
-        /// <summary>
-        /// Main rendering loop. Renders all Particles and Probe.
-        /// </summary>
-        /// <param name="g"></param>
-        /// <param name="clientSize"></param>
-        public void Render(Graphics g, Size clientSize, Vector2 probeDirection)
-        { 
 
-            foreach (Particle particle in _particles)
-            {
-                DrawParticle(g, particle);
-            }
-
-            DrawProbe(g, _mainProbe, probeDirection);
-        }
         /// <summary>
         /// Main rendering loop. Renders all Particles and Probe.
         /// </summary>
@@ -242,6 +232,9 @@ namespace ElectricFieldVis.View
         /// <param name="clientSize"></param>
         public void Render(Graphics g, Size clientSize)
         {
+            DrawGrid(g,Grid_points);
+            DrawStaticProbes(g, Grid_points);
+
             foreach (Particle particle in _particles)
             {
                 DrawParticle(g, particle);
@@ -428,7 +421,88 @@ namespace ElectricFieldVis.View
 
 
         #region Grid
+        Point[,]? _grid_points = null;
 
+        Point[,] Grid_points
+        {
+            get
+            {
+                if (_grid_points == null)
+                {
+                    _grid_points = CalculateGridPoints();
+                }
+                return _grid_points;
+            }
+            set
+            {
+                _grid_points = CalculateGridPoints();
+            }
+        }
+        public Point[,] CalculateGridPoints(int width_px = 100, int height_px = 100)
+        {
+            int vertical_offset = 0;// width_px / 2;
+            int horizontal_offset = 0;// height_px / 2;
+
+            int vertical_count = (this._curr_client_size.Width + vertical_offset) / width_px + 1 + 1; // +1 for integer division CEILING
+            int horizontal_count = (this._curr_client_size.Height + horizontal_offset) / height_px + 1 + 1; // second +1 for overflow - too have grid slightly bigger than canvas
+
+            int max_w = this._curr_client_size.Width;
+            int max_h = this._curr_client_size.Height;
+
+            Point[,] points = new Point[horizontal_count,vertical_count];
+
+            for (int i = 0; i < horizontal_count; i++)
+            {
+                for (int j = 0; j < vertical_count; j++)
+                {
+                    points[i, j] = new Point(j * width_px + vertical_offset, i * height_px + horizontal_offset);
+                }
+            }
+
+            return points;
+        }
+        public void DrawGrid(Graphics g, Point[,] points)
+        {
+            Pen pen = new Pen(Brushes.Gray, 1f);
+
+            int width = points.GetLength(0);
+            int height = points.GetLength(1);
+            for (int i = 0;i < width; i++)
+            {
+                g.DrawLine(pen, points[i, 0], points[i, height - 1]);
+            }
+
+            for (int i = 0; i < height; i++)
+            {
+                g.DrawLine(pen, points[0, i], points[width - 1, i]);
+            }
+        }
+
+        public void DrawStaticProbes(Graphics g, Point[,] points)
+        {
+            int width = points.GetLength(0);
+            int height = points.GetLength(1);
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    DrawStaticProbe(g, points[i, j]);
+                }
+            }
+        }
+
+        public void DrawStaticProbe(Graphics g, Point here)
+        {
+            Vector2 vect = FieldCalculator.CalculateFieldDirection(new Vector2(here.X,here.Y), _particles);
+            float intensity = FieldCalculator.CalculateFieldIntensity(vect);
+            Pen pen = new Pen(Color.Black, 5);
+            pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
+
+            Vector2 endHere = new Vector2(here.X + vect.X, here.Y + vect.Y);
+            g.DrawLine(pen, here, endHere);
+            g.FillEllipse(Brushes.Green, new Rectangle(here, new Size(10, 10)));
+        }
 
 
         #endregion Grid
