@@ -205,7 +205,7 @@ namespace ElectricFieldVis.View
         public Vector2 GetRealWorldCoords(Vector2 drawingCoords)
         {
             float x = (drawingCoords.X - _origin.X) / _scale;
-            float y = (drawingCoords.Y - _origin.Y) / _scale;
+            float y = -1 * (drawingCoords.Y - _origin.Y) / _scale;
 
             return new Vector2(x,y);
         }
@@ -533,9 +533,8 @@ namespace ElectricFieldVis.View
             Pen pen = new Pen(Color.Black, 5);
             pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
 
-            float len = 30f;
+            float len = Math.Min(_grid_w, _grid_h);
 
-            vect *= -1;
             Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y + vect.Y / intensity * len));
 
             g.DrawLine(pen, here, endHere);

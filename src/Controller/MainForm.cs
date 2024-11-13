@@ -213,15 +213,16 @@ namespace ElectricFieldVis.Controller
 
         private Vector2 _map_position_before = Vector2.Zero;
         private bool _moving_map = false;
+        private Particle? _moving_particle = null;
+        // MOVING PARTICLE IS NOT MOVING BUT VISUALLY IS WHEN OUT OF THE WINDOW, BUT ON THE SCREEN - kdyz presouvam particle mimo okno, tak ho tam sice presunu, ale sipky si mysli, ze je jinde
         private void MainForm_MouseDown(object? sender, MouseEventArgs e)
         {
-            // if nothing else is hit TODO
             if (e.Button == MouseButtons.Right)
             {
                 _moving_map = true;
                 _map_position_before = new Vector2(e.X, e.Y);
             }
-            if (e.Button == MouseButtons.Left && Form.ModifierKeys == Keys.Control)
+            if (e.Button == MouseButtons.Left)
             {
                 HandleParticleOnClick(e);
             }
@@ -230,10 +231,8 @@ namespace ElectricFieldVis.Controller
 
         private void MainForm_MouseUp(object? sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
-            {
-                _moving_map = false;
-            }
+            _moving_map = false;
+            _moving_particle = null;
             
         }
 
@@ -245,6 +244,12 @@ namespace ElectricFieldVis.Controller
                 Vector2 difference =  map_position_now - _map_position_before;
                 _renderer.Origin = _renderer.Origin + difference;
                 _map_position_before = map_position_now;
+            }
+            if (_moving_particle != null)
+            {
+                Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+                _moving_particle.X = click.X;
+                _moving_particle.Y = click.Y;
             }
         }
         private bool _zooming = false;
@@ -268,7 +273,6 @@ namespace ElectricFieldVis.Controller
             Particle? the_clicked_one = null;
 
             Vector2 click = _renderer.GetRealWorldCoords( new Vector2(e.X, e.Y));
-            click.Y *= -1;
 
             for (int i = 0; i < _particles.Count; i++)
             {
@@ -294,19 +298,30 @@ namespace ElectricFieldVis.Controller
                 return;
             }
 
-            Point here = new Point(e.X + this.Location.X, e.Y + this.Location.Y);
-            string input = InputBox.Show("", here, the_clicked_one.Value.ToString());
-
-            if (input == "")
-            {
-                return ;
-            }
             
-            float new_value = the_clicked_one.Value;
-            if (float.TryParse(input.Trim(),out new_value))
+            if (Form.ModifierKeys == Keys.Control)
             {
-                the_clicked_one.Value = new_value;
+                // if intention to change value of particle
+                Point here = new Point(e.X + this.Location.X, e.Y + this.Location.Y);
+                string input = InputBox.Show("", here, the_clicked_one.Value.ToString());
+
+                if (input == "")
+                {
+                    return;
+                }
+
+                float new_value = the_clicked_one.Value;
+                if (float.TryParse(input.Trim(), out new_value))
+                {
+                    the_clicked_one.Value = new_value;
+                }
+                return;
             }
+
+            // if intention to move particle
+            _moving_particle = the_clicked_one;
+            
+            
         }
 
 
