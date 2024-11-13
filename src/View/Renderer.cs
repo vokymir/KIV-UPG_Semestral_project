@@ -182,7 +182,7 @@ namespace ElectricFieldVis.View
         /// <param name="x">X position</param>
         /// <param name="y">Y position</param>
         /// <returns>Vector2(X, Y)</returns>
-        private Vector2 TranslateCoordinates(float x, float y)
+        public Vector2 TranslateCoordinates(float x, float y)
         {
             return TranslateCoordinates(new Vector2(x, y));
         }
@@ -192,7 +192,7 @@ namespace ElectricFieldVis.View
         /// </summary>
         /// <param name="realWorldCoords">Vector2(X, Y)</param>
         /// <returns>Vector2(X, Y)</returns>
-        private Vector2 TranslateCoordinates(Vector2 realWorldCoords)
+        public Vector2 TranslateCoordinates(Vector2 realWorldCoords)
         {
             float x = _origin.X + realWorldCoords.X * _scale;
             float y = _origin.Y - realWorldCoords.Y * _scale;
@@ -202,7 +202,7 @@ namespace ElectricFieldVis.View
             return drawingCoords;
         }
 
-        private Vector2 GetRealWorldCoords(Vector2 drawingCoords)
+        public Vector2 GetRealWorldCoords(Vector2 drawingCoords)
         {
             float x = (drawingCoords.X - _origin.X) / _scale;
             float y = (drawingCoords.Y - _origin.Y) / _scale;
@@ -215,7 +215,7 @@ namespace ElectricFieldVis.View
         /// </summary>
         /// <param name="particle">The particle to calculate radius to.</param>
         /// <returns>The radius in real-life units.</returns>
-        private float CalculateParticleRadius(Particle particle)
+        public float CalculateParticleRadius(Particle particle)
         {
             float baseRadius = 0.1f;
 

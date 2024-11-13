@@ -221,8 +221,13 @@ namespace ElectricFieldVis.Controller
                 _moving_map = true;
                 _map_position_before = new Vector2(e.X, e.Y);
             }
-            
+            if (e.Button == MouseButtons.Left)
+            {
+                HandleParticleOnClick(e);
+            }
+
         }
+
         private void MainForm_MouseUp(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -257,6 +262,56 @@ namespace ElectricFieldVis.Controller
                 _zooming = false;
             }
         }
+
+        private void HandleParticleOnClick(MouseEventArgs e)
+        {
+            Particle? the_clicked_one = null;
+
+            Vector2 click = _renderer.GetRealWorldCoords( new Vector2(e.X, e.Y));
+            click.Y *= -1;
+
+            for (int i = 0; i < _particles.Count; i++)
+            {
+
+                Particle particle = _particles[i];
+                float particle_radius = _renderer.CalculateParticleRadius(particle);
+
+                //MessageBox.Show($"${click} vs ${particle.X},${particle.Y}");
+
+                if (click.X <= particle.X + particle_radius &&
+                    click.X >= particle.X - particle_radius &&
+                    click.Y <= particle.Y + particle_radius &&
+                    click.Y >= particle.Y - particle_radius
+                    )
+                {
+                    the_clicked_one = particle;
+                    break;
+                }
+            }
+
+            if (the_clicked_one == null)
+            {
+                return;
+            }
+
+            Point here = new Point(e.X + this.Location.X, e.Y + this.Location.Y);
+            string input = InputBox.Show("", here);
+
+            if (input == "")
+            {
+                return ;
+            }
+            
+            int new_value = the_clicked_one.Value;
+            if (int.TryParse(input,out new_value))
+            {
+
+            }
+                
+            
+        }
+
+
 
         #endregion interactivity
     }
