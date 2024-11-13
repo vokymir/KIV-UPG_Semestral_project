@@ -197,7 +197,13 @@ namespace ElectricFieldVis.View
             return drawingCoords;
         }
 
-        
+        private Vector2 GetRealWorldCoords(Vector2 drawingCoords)
+        {
+            float x = (drawingCoords.X - _origin.X) / _scale;
+            float y = (drawingCoords.Y - _origin.Y) / _scale;
+
+            return new Vector2(x,y);
+        }
 
         /// <summary>
         /// Calculate the radius of a particle in real-life units. To convert to drawing-units multiply by _scale.
@@ -494,16 +500,20 @@ namespace ElectricFieldVis.View
 
         public void DrawStaticProbe(Graphics g, Point here)
         {
-            Vector2 vect = FieldCalculator.CalculateFieldDirection(new Vector2(here.X,here.Y), _particles);
+            Vector2 real_world_here = GetRealWorldCoords(new Vector2(here.X, here.Y));
+
+            Vector2 vect = FieldCalculator.CalculateFieldDirection(real_world_here, _particles);
             float intensity = FieldCalculator.CalculateFieldIntensity(vect);
+
             Pen pen = new Pen(Color.Black, 5);
             pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
 
-            float len = 0.1f * _scale;
+            float len = 30f;
 
+            vect *= -1;
             Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y + vect.Y / intensity * len));
 
-            g.DrawLine(pen, here,endHere);
+            g.DrawLine(pen, here, endHere);
             g.FillEllipse(Brushes.Green, new Rectangle(here, new Size(10, 10)));
         }
 
