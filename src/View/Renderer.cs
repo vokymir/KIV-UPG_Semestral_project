@@ -535,7 +535,7 @@ namespace ElectricFieldVis.View
 
             float len = Math.Min(_grid_w, _grid_h);
 
-            Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y + vect.Y / intensity * len));
+            Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y - vect.Y / intensity * len));
 
             g.DrawLine(pen, here, endHere);
         }
