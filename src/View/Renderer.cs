@@ -63,10 +63,12 @@ namespace ElectricFieldVis.View
         /// <param name="particles">List of particles to render.</param>
         /// <param name="probe">Probe to render.</param>
         /// <param name="clientSize">Client size.</param>
-        public Renderer(List<Particle> particles, Probe probe, Size clientSize)
+        public Renderer(List<Particle> particles, Probe probe, Size clientSize, int grid_w, int grid_h)
         {
             this._particles = particles;
             this._mainProbe = probe;
+            this._grid_w = grid_w;
+            this._grid_h = grid_h;
 
             _curr_client_size = clientSize;
 
@@ -464,13 +466,16 @@ namespace ElectricFieldVis.View
                 _grid_points = CalculateGridPoints();
             }
         }
-        public Point[,] CalculateGridPoints(int width_px = 100, int height_px = 100)
+        private int _grid_w;
+        private int _grid_h;
+
+        public Point[,] CalculateGridPoints()
         {
             int vertical_offset = 0;// width_px / 2;
             int horizontal_offset = 0;// height_px / 2;
 
-            int vertical_count = (this._curr_client_size.Width + vertical_offset) / width_px + 1 + 1; // +1 for integer division CEILING
-            int horizontal_count = (this._curr_client_size.Height + horizontal_offset) / height_px + 1 + 1; // second +1 for overflow - too have grid slightly bigger than canvas
+            int vertical_count = (this._curr_client_size.Width + vertical_offset) / _grid_w + 1 + 1; // +1 for integer division CEILING
+            int horizontal_count = (this._curr_client_size.Height + horizontal_offset) / _grid_h + 1 + 1; // second +1 for overflow - too have grid slightly bigger than canvas
 
             int max_w = this._curr_client_size.Width;
             int max_h = this._curr_client_size.Height;
@@ -481,7 +486,7 @@ namespace ElectricFieldVis.View
             {
                 for (int j = 0; j < vertical_count; j++)
                 {
-                    points[i, j] = new Point(j * width_px + vertical_offset, i * height_px + horizontal_offset);
+                    points[i, j] = new Point(j * _grid_w + vertical_offset, i * _grid_h + horizontal_offset);
                 }
             }
 

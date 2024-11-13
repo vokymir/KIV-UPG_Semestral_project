@@ -22,12 +22,12 @@ namespace ElectricFieldVis.Controller
         /// Init MainForms components - Model, View, Controller and WinForm itself.
         /// </summary>
         /// <param name="scenarioName">Name of the desired scenario.</param>
-        public MainForm(string scenarioName = "0")
+        public MainForm(string scenarioName, int grid_w, int grid_h)
         {
             this.Size = new Size(800, 600);
 
             InitializeModel(scenarioName);
-            InitializeView();
+            InitializeView(grid_w, grid_h);
             InitializeComponent();
             InitializeController();
 
@@ -62,9 +62,9 @@ namespace ElectricFieldVis.Controller
         /// <summary>
         /// Init View by creating Renderer with all particles and probe.
         /// </summary>
-        private void InitializeView()
+        private void InitializeView(int grid_w, int grid_h)
         {
-            _renderer = new Renderer(_particles, _probe, this.ClientSize);
+            _renderer = new Renderer(_particles, _probe, this.ClientSize, grid_w, grid_h);
         }
 
         /// <summary>
