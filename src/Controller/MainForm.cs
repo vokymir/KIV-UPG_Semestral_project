@@ -216,17 +216,25 @@ namespace ElectricFieldVis.Controller
         private void MainForm_MouseDown(object? sender, MouseEventArgs e)
         {
             // if nothing else is hit TODO
-            _moving_map = true;
-            _map_position_before = new Vector2(e.X, e.Y);
+            if (e.Button == MouseButtons.Right)
+            {
+                _moving_map = true;
+                _map_position_before = new Vector2(e.X, e.Y);
+            }
+            
         }
         private void MainForm_MouseUp(object? sender, MouseEventArgs e)
         {
-            _moving_map = false;
+            if (e.Button == MouseButtons.Right)
+            {
+                _moving_map = false;
+            }
+            
         }
 
         private void MainForm_MouseMove(object? sender, MouseEventArgs e)
         {
-            if (_moving_map)
+            if (_moving_map && e.Button == MouseButtons.Right)
             {
                 Vector2 map_position_now = new Vector2(e.X, e.Y);
                 Vector2 difference =  map_position_now - _map_position_before;
