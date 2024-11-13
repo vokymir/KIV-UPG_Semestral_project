@@ -221,7 +221,7 @@ namespace ElectricFieldVis.Controller
                 _moving_map = true;
                 _map_position_before = new Vector2(e.X, e.Y);
             }
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left && Form.ModifierKeys == Keys.Control)
             {
                 HandleParticleOnClick(e);
             }
