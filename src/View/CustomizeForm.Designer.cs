@@ -38,6 +38,8 @@
             ParticleDynamicWidth = new CheckBox();
             ZoomFactorBar = new HScrollBar();
             ZoomFactorLabel = new Label();
+            showGrid = new CheckBox();
+            showStaticProbes = new CheckBox();
             SuspendLayout();
             // 
             // ProbeColor
@@ -134,11 +136,43 @@
             ZoomFactorLabel.TabIndex = 10;
             ZoomFactorLabel.Text = "Zooming speed";
             // 
+            // showGrid
+            // 
+            showGrid.AutoSize = true;
+            showGrid.CheckAlign = ContentAlignment.MiddleRight;
+            showGrid.Checked = true;
+            showGrid.CheckState = CheckState.Checked;
+            showGrid.Location = new Point(6, 224);
+            showGrid.Margin = new Padding(3, 4, 3, 4);
+            showGrid.Name = "showGrid";
+            showGrid.Size = new Size(98, 24);
+            showGrid.TabIndex = 11;
+            showGrid.Text = "Show grid";
+            showGrid.UseVisualStyleBackColor = true;
+            showGrid.CheckedChanged += showGrid_CheckedChanged;
+            // 
+            // showStaticProbes
+            // 
+            showStaticProbes.AutoSize = true;
+            showStaticProbes.CheckAlign = ContentAlignment.MiddleRight;
+            showStaticProbes.Checked = true;
+            showStaticProbes.CheckState = CheckState.Checked;
+            showStaticProbes.Location = new Point(6, 256);
+            showStaticProbes.Margin = new Padding(3, 4, 3, 4);
+            showStaticProbes.Name = "showStaticProbes";
+            showStaticProbes.Size = new Size(156, 24);
+            showStaticProbes.TabIndex = 12;
+            showStaticProbes.Text = "Show static probes";
+            showStaticProbes.UseVisualStyleBackColor = true;
+            showStaticProbes.CheckedChanged += showStaticProbes_CheckedChanged;
+            // 
             // CustomizerForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(914, 600);
+            Controls.Add(showStaticProbes);
+            Controls.Add(showGrid);
             Controls.Add(ZoomFactorLabel);
             Controls.Add(ZoomFactorBar);
             Controls.Add(ParticleDynamicWidth);
@@ -167,5 +201,7 @@
         private CheckBox ParticleDynamicWidth;
         private HScrollBar ZoomFactorBar;
         private Label ZoomFactorLabel;
+        private CheckBox showGrid;
+        private CheckBox showStaticProbes;
     }
 }

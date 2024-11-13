@@ -23,6 +23,9 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
 
+        private bool _showGrid = true;
+        private bool _showStaticProbes = true;
+
         private Vector2 _origin = Vector2.Zero;
         public Vector2 Origin
         {
@@ -230,7 +233,7 @@ namespace ElectricFieldVis.View
 
         #region Draw
 
-
+        
         /// <summary>
         /// Main rendering loop. Renders all Particles and Probe.
         /// </summary>
@@ -238,8 +241,14 @@ namespace ElectricFieldVis.View
         /// <param name="clientSize"></param>
         public void Render(Graphics g, Size clientSize)
         {
-            DrawGrid(g,Grid_points);
-            DrawStaticProbes(g, Grid_points);
+            if (_showGrid)
+            {
+                DrawGrid(g, Grid_points);
+            }
+            if (_showStaticProbes)
+            {
+                DrawStaticProbes(g, Grid_points);
+            }
 
             foreach (Particle particle in _particles)
             {
@@ -387,10 +396,21 @@ namespace ElectricFieldVis.View
                 _customizerForm.ParticlePositiveColorChanged += UpdateParticlePositiveColor;
                 _customizerForm.ParticleNegativeColorChanged += UpdateParticleNegativeColor;
                 _customizerForm.ZoomLevelChanged += UpdateZoomLevel;
-
+                _customizerForm.ShowGridChanged += UpdateGridVisibility;
+                _customizerForm.ShowStaticProbesChanged += UpdateStaticProbesVisibility;
 
                 _customizerForm.Show();
             }
+        }
+
+        private void UpdateStaticProbesVisibility(bool obj)
+        {
+            _showStaticProbes = obj;
+        }
+
+        private void UpdateGridVisibility(bool obj)
+        {
+            _showGrid = obj;
         }
 
         private float _zooming_factor = 1f;
@@ -514,7 +534,6 @@ namespace ElectricFieldVis.View
             Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y + vect.Y / intensity * len));
 
             g.DrawLine(pen, here, endHere);
-            g.FillEllipse(Brushes.Green, new Rectangle(here, new Size(10, 10)));
         }
 
 

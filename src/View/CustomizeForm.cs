@@ -19,10 +19,13 @@ namespace ElectricFieldVis.View
         public event Action<Color> ParticlePositiveColorChanged;
         public event Action<Color> ParticleNegativeColorChanged;
         public event Action<int> ZoomLevelChanged;
+        public event Action<bool> ShowGridChanged;
+        public event Action<bool> ShowStaticProbesChanged;
 
         private Color _probeColor;
         private Color _particlePositiveColor = Color.Red;
         private Color _particleNegativeColor = Color.Blue;
+
 
 
         /// <summary>
@@ -38,6 +41,8 @@ namespace ElectricFieldVis.View
             InitializeComponent();
 
             ParticleDynamicWidth.Checked = particleDynamicWidth;
+            showGrid.Checked = true;
+            showStaticProbes.Checked = true;
 
             this.Size = new Size(300, 300);
             this.StartPosition = FormStartPosition.Manual;
@@ -120,6 +125,16 @@ namespace ElectricFieldVis.View
         {
             int level = ZoomFactorBar.Value;
             ZoomLevelChanged?.Invoke(level);
+        }
+
+        private void showGrid_CheckedChanged(object sender, EventArgs e)
+        {
+            ShowGridChanged?.Invoke(showGrid.Checked);
+        }
+
+        private void showStaticProbes_CheckedChanged(object sender, EventArgs e)
+        {
+            ShowStaticProbesChanged?.Invoke(showStaticProbes.Checked);
         }
     }
 }
