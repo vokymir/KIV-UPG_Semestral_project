@@ -16,9 +16,9 @@ namespace ElectricFieldVis.Controller
 
         public string InputText => txtInput.Text;
 
-        public static string Show(string title, Point position,int width = 200, int height = 10)
+        public static string Show(string title, Point position, string defaultText = "", int width = 200, int height = 10)
         {
-            using (var inputBox = new InputBox(title,width,height))
+            using (var inputBox = new InputBox(title,width,height, defaultText))
             {
                 // Set the position to where the user clicked
                 inputBox.StartPosition = FormStartPosition.Manual;
@@ -35,7 +35,7 @@ namespace ElectricFieldVis.Controller
             }
         }
 
-        public InputBox(string title, int width, int height)
+        public InputBox(string title, int width, int height, string defaultText)
         {
             // Basic settings for the form
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -56,7 +56,8 @@ namespace ElectricFieldVis.Controller
             {
                 Width = this.Width,
                 Location = new Point(0, 5),
-                MaxLength = 20 // Limit the input to 20 chars
+                MaxLength = 20, // Limit the input to 20 chars
+                Text = defaultText
             };
 
             txtInput.KeyDown += (s, e) =>

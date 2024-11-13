@@ -295,20 +295,18 @@ namespace ElectricFieldVis.Controller
             }
 
             Point here = new Point(e.X + this.Location.X, e.Y + this.Location.Y);
-            string input = InputBox.Show("", here);
+            string input = InputBox.Show("", here, the_clicked_one.Value.ToString());
 
             if (input == "")
             {
                 return ;
             }
             
-            int new_value = the_clicked_one.Value;
-            if (int.TryParse(input,out new_value))
+            float new_value = the_clicked_one.Value;
+            if (float.TryParse(input.Trim(),out new_value))
             {
-
+                the_clicked_one.Value = new_value;
             }
-                
-            
         }
 
 
