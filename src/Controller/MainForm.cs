@@ -184,9 +184,18 @@ namespace ElectricFieldVis.Controller
             _timeElapsed += deltaTime;
 
             _probe.UpdatePosition(_timeElapsed);
+            UpdateParticleValues(_timeElapsed);
             drawingPanel.Invalidate();
             
             UpdateStatsForm();
+        }
+
+        private void UpdateParticleValues(float timeElapsed)
+        {
+            foreach (Particle particle in _particles)
+            {
+                particle.setValue(timeElapsed);
+            }
         }
 
         /// <summary>

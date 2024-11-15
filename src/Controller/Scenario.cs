@@ -62,6 +62,11 @@ namespace ElectricFieldVis.Controller
                 scenario = Scenario.DefaultLoad("Scenario wasn't loaded properly (particles null).");
             }
 
+            foreach (Particle particle in scenario.particles)
+            {
+                particle.trueInit();
+            }
+
             return scenario;
         }
 
