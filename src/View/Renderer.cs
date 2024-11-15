@@ -275,7 +275,7 @@ namespace ElectricFieldVis.View
             // set sizes
             float radius = CalculateParticleRadius(particle) * _scale;
             
-            float fontSize = 0.1f * _scale;
+            float fontSize = 0.08f * _scale;
 
             // set color, blue if negative value, red if positive
             Color particleColor = particle.Value > 0 ? _particlePositiveColor : _particleNegativeColor;
@@ -290,8 +290,18 @@ namespace ElectricFieldVis.View
             using (Brush textBrush = new SolidBrush(Color.Black))
             using (Font font = new Font("Serif", fontSize))
             {
-                string chargeLabel = $"{particle.Value:+0;-0} C";
+                string chargeLabel = $"{particle.Value:+0.00;-0.00} C";
                 SizeF textSize = g.MeasureString(chargeLabel,font);
+
+                // draw value background
+                Rectangle rectangle = new Rectangle(
+                    (int)(particleCoords.X - textSize.Width / 2),
+                    (int)(particleCoords.Y - radius - textSize.Height),
+                    (int)(textSize.Width),
+                    (int)(textSize.Height)
+                    );
+                g.FillRectangle(new SolidBrush(Color.FromArgb(230, 255, 255, 255)), rectangle);
+
                 g.DrawString(chargeLabel, font, textBrush, particleCoords.X - textSize.Width / 2, particleCoords.Y - radius - textSize.Height);
             }
 
@@ -341,13 +351,6 @@ namespace ElectricFieldVis.View
 
             }
 
-            // draw arrow
-            using (Brush brush = new SolidBrush(probeColor))
-            {
-                Pen pen = new Pen(brush, _scale * 0.05f);
-                pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
-                g.DrawLine(pen,new PointF(probeCoords),new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
-            }
 
             // draw value text
             using (Brush textBrush = new SolidBrush(Color.Black))
@@ -363,10 +366,19 @@ namespace ElectricFieldVis.View
                     (int)(textSize.Width),
                     (int)(textSize.Height)
                     );
-                g.FillRectangle(new SolidBrush(Color.FromArgb(128, 255, 255, 255)), rectangle);
+                g.FillRectangle(new SolidBrush(Color.FromArgb(230, 255, 255, 255)), rectangle);
 
                 // draw text
                 g.DrawString(chargeLabel, font, textBrush, probeCoords.X - textSize.Width / 2, probeCoords.Y + textSize.Height / 2);
+            }
+
+
+            // draw arrow
+            using (Brush brush = new SolidBrush(probeColor))
+            {
+                Pen pen = new Pen(brush, _scale * 0.05f);
+                pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
+                g.DrawLine(pen, new PointF(probeCoords), new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
             }
         }
 

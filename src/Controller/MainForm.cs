@@ -75,6 +75,7 @@ namespace ElectricFieldVis.Controller
             _timer = new System.Windows.Forms.Timer();
             _timer.Interval = 1000 / _fps;
             _timer.Tick += OnTimerTick;
+            _lastUpdateTime = Environment.TickCount / 1000f;
             _timer.Start();
         }
 

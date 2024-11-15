@@ -1,0 +1,14 @@
+﻿{
+  "particles": [
+    {
+      "X": -1,
+      "Y": 0,
+      "Expression": "1 + 1f/2 * Sin(PI / 2 * t)"
+    },
+    {
+      "X": 1,
+      "Y": 0,
+      "Expression": "-1 - 1f/2 * Sin(PI / 2 * t)"
+    }
+  ]
+}

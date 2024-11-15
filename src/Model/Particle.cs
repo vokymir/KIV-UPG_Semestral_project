@@ -41,41 +41,48 @@ namespace ElectricFieldVis.Model
         // for frame-based calculations of value
         public void setValue(float time)
         {
-            if (_context == null)
-            {
-                _context = new ExpressionContext();
-            }
-            _context.Variables["t"] = time;
+            initContext();
+            _context.Variables["t"] = (double)time;
             
             // predpoklad OK vstupu do Expression
             if (_expr == null)
             {
+                ensureExpression();
                 _expr = _context.CompileGeneric<double>(Expression);
             }
 
-            Value = (float)(_expr.Evaluate());
+            double res = _expr.Evaluate();
+            Value = (float)res;
         }
 
         public void trueInit()
+        {
+            ensureExpression();
+            initContext();
+            initExpr();
+            setValue(0);
+        }
+
+        private void ensureExpression()
         {
             if (Expression == "")
             {
                 Expression = Value.ToString();
             }
-
-            initContext();
-            initExpr();
-            setValue(0f);
+            if (Expression == "")
+            {
+                Expression = "0";
+            }
         }
-
         public void initContext()
         {
             if (_context == null)
             {
                 _context = new ExpressionContext();
+                _context.Imports.AddType(typeof(System.Math));
             }
 
-            _context.Variables["t"] = 0;
+            _context.Variables["t"] = 0.0;
         }
 
         // predpoklada OK vstup & existenci _contextu
