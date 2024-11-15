@@ -55,6 +55,19 @@ namespace ElectricFieldVis.Model
             Value = (float)res;
         }
 
+        public void setExpression(string exp)
+        {
+            try
+            {
+                _expr = _context.CompileGeneric<double>(exp);
+                Expression = exp;
+
+            }catch (Exception ex)
+            {
+                MessageBox.Show($"Please enter valid input. Your input: ${exp}");
+            }
+        }
+
         public void trueInit()
         {
             ensureExpression();

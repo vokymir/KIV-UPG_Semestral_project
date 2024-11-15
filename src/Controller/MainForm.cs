@@ -313,18 +313,15 @@ namespace ElectricFieldVis.Controller
             {
                 // if intention to change value of particle
                 Point here = new Point(e.X + this.Location.X, e.Y + this.Location.Y);
-                string input = InputBox.Show("", here, the_clicked_one.Value.ToString());
+                string input = InputBox.Show("", here, the_clicked_one.Expression);
 
                 if (input == "")
                 {
                     return;
                 }
 
-                float new_value = the_clicked_one.Value;
-                if (float.TryParse(input.Trim(), out new_value))
-                {
-                    the_clicked_one.Value = new_value;
-                }
+                the_clicked_one.setExpression(input);
+
                 return;
             }
 

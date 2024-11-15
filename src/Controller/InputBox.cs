@@ -56,7 +56,6 @@ namespace ElectricFieldVis.Controller
             {
                 Width = this.Width,
                 Location = new Point(0, 5),
-                MaxLength = 20, // Limit the input to 20 chars
                 Text = defaultText
             };
 
@@ -72,6 +71,31 @@ namespace ElectricFieldVis.Controller
                 {
                     DialogResult = DialogResult.OK;
                     Close();
+                }
+
+                // FOLLOWING SECTION WORKS a little off, nonetheless at least most of the times
+                var textDim = TextRenderer.MeasureText(this.txtInput.Text, txtInput.Font);
+                var wid = textDim.Width + 20;
+                var hig = textDim.Height + 5;
+
+                // if out of the screen or too thick, wrap
+                var screenWid = Screen.FromControl(this).WorkingArea.Width;
+                if (this.Width > 500 || this.Location.X + this.Width > screenWid)
+                {
+                    this.txtInput.WordWrap = true;
+                    var rows = wid / this.txtInput.Width + 1;
+                    this.Height = hig * rows + hig;
+                    this.txtInput.Height = this.Height - 10;
+                    this.txtInput.Multiline = true;
+                }
+                else // make the window bigger
+                {
+
+                    if (wid > this.Width)
+                    {
+                        this.Width += 20;
+                        this.txtInput.Width = this.Width;
+                    }
                 }
             };
 
