@@ -16,6 +16,7 @@ namespace ElectricFieldVis.Controller
     {
         public bool isDefault {  get; set; }
         public List<Particle>? particles { get; set; }
+        public Probe? secondProbe { get; set; }
         public Scenario() { }
 
         /// <summary>
@@ -101,9 +102,26 @@ namespace ElectricFieldVis.Controller
             }
         }
 
-        internal static void SaveScenario()
+        internal static void SaveScenario(Scenario s, string name)
         {
-            throw new NotImplementedException();
+            string filePath = $"Scenarios/{name}.json";
+
+
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write))
+                {
+                    using(StreamWriter sw = new StreamWriter(fs))
+                    {
+                        string jsonStr = JsonSerializer.Serialize<Scenario>(s);
+                        sw.Write(jsonStr);
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Scenario with this name already exists. Please choose another name and try again.");
+            }            
         }
     }
 }

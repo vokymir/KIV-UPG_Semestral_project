@@ -18,6 +18,7 @@ namespace ElectricFieldVis.Controller
         private StatsForm _statsForm;
         private MenuStrip _menuStrip;
         public string _scenario;
+        private Probe? _secondProbe;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -58,6 +59,7 @@ namespace ElectricFieldVis.Controller
             Scenario scenario = Scenario.LoadScenario(scenarioName);
             _particles = scenario.particles;
             _probe = new Probe();
+            _secondProbe = scenario.secondProbe;
             _scenario = scenario.isDefault ? "0" : scenarioName;
         }
 
@@ -67,6 +69,7 @@ namespace ElectricFieldVis.Controller
         private void InitializeView(int grid_w, int grid_h)
         {
             _renderer = new Renderer(_particles, _probe, this.ClientSize, grid_w, grid_h);
+            _renderer._secondProbe = _secondProbe;
         }
         
 
@@ -150,7 +153,7 @@ namespace ElectricFieldVis.Controller
             var wid = 200;
             var hgt = 10;
             var pt = new Point((w - wid)/2, (h - hgt)/2);
-            var newScen = InputBox.Show("Which Scenario Shoul Load",pt,_scenario,wid,hgt);
+            var newScen = InputBox.Show("Which Scenario Should Load",pt,_scenario,wid,hgt);
             
             InitializeModel(newScen);
             _renderer._particles = this._particles;
@@ -160,7 +163,19 @@ namespace ElectricFieldVis.Controller
 
         private void Click_save(object? sender, EventArgs e)
         {
-            Scenario.SaveScenario();
+            Scenario sc = new Scenario();
+            sc.particles = this._particles;
+            sc.secondProbe = this._secondProbe;
+
+            var scr = Screen.FromControl(this).WorkingArea;
+            var w = scr.Width;
+            var h = scr.Height;
+            var wid = 200;
+            var hgt = 10;
+            var pt = new Point((w - wid) / 2, (h - hgt) / 2);
+            string name = InputBox.Show("Name this scenario", pt);
+
+            Scenario.SaveScenario(sc, name);
         }
 
         private void Click_scale_to_fit(object? sender, EventArgs e)
