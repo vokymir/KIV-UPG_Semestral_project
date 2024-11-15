@@ -3,22 +3,22 @@
     {
       "X": -1,
       "Y": -1,
-      "Value": 1
+      "EXPRESSION": "1"
     },
     {
       "X": 1,
       "Y": -1,
-      "Value": 2
+      "EXPRESSION": "2"
     },
     {
       "X": 1,
       "Y": 1,
-      "Value": -3
+      "EXPRESSION": "-3"
     },
     {
       "X": -1,
       "Y": 1,
-      "Value": -4
+      "EXPRESSION": "-4"
     }
   ]
 }
