@@ -69,13 +69,6 @@ namespace ElectricFieldVis.Controller
                 particle.trueInit();
             }
 
-            if (scenario.secondProbe != null)
-            {
-                float x = scenario.secondProbe.X;
-                float y = scenario.secondProbe.Y;
-                scenario.secondProbe.position = new System.Numerics.Vector2(x, y);
-            }
-
             return scenario;
         }
 

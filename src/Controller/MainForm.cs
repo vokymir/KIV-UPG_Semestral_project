@@ -18,7 +18,6 @@ namespace ElectricFieldVis.Controller
         private StatsForm _statsForm;
         private MenuStrip _menuStrip;
         public string _scenarioName = "";
-        private Probe? _secondProbe;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -59,8 +58,6 @@ namespace ElectricFieldVis.Controller
             Scenario scenario = Scenario.LoadScenario(scenarioName);
             _particles = scenario.particles;
             _probe = new Probe();
-            _secondProbe = scenario.secondProbe;
-            _renderer._secondProbe = _secondProbe;
             _scenarioName = scenario.isDefault ? "0" : scenarioName;
             
             
@@ -72,7 +69,6 @@ namespace ElectricFieldVis.Controller
         private void InitializeView(int grid_w, int grid_h)
         {
             _renderer = new Renderer(_particles, _probe, this.ClientSize, grid_w, grid_h);
-            _renderer._secondProbe = _secondProbe;
         }
         
 
@@ -161,14 +157,12 @@ namespace ElectricFieldVis.Controller
             InitializeModel(newScen);
             _renderer._particles = this._particles;
             _renderer._mainProbe = this._probe;
-            _renderer._secondProbe = this._secondProbe;
         }
 
         private void Click_save(object? sender, EventArgs e)
         {
             Scenario sc = new Scenario();
             sc.particles = this._particles;
-            sc.secondProbe = this._secondProbe;
 
             var scr = Screen.FromControl(this).WorkingArea;
             var w = scr.Width;
@@ -243,12 +237,6 @@ namespace ElectricFieldVis.Controller
             _timeElapsed += deltaTime;
 
             _probe.UpdatePosition(_timeElapsed);
-
-            if (_secondProbe != null)
-            {
-                _secondProbe.UpdatePosition(_timeElapsed);
-            }
-
             UpdateParticleValues(_timeElapsed);
             drawingPanel.Invalidate();
             
@@ -315,7 +303,6 @@ namespace ElectricFieldVis.Controller
             Probe probe = new Probe(click, 0, Color.Aqua);
 
             _renderer._secondProbe = probe;
-            this._secondProbe = probe;
 
         }
 
