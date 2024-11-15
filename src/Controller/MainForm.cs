@@ -17,6 +17,7 @@ namespace ElectricFieldVis.Controller
         private int _fps = 30;
         private StatsForm _statsForm;
         private MenuStrip _menuStrip;
+        public string _scenario;
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -57,6 +58,7 @@ namespace ElectricFieldVis.Controller
             Scenario scenario = Scenario.LoadScenario(scenarioName);
             _particles = scenario.particles;
             _probe = new Probe();
+            _scenario = scenario.isDefault ? "0" : scenarioName;
         }
 
         /// <summary>
@@ -66,6 +68,7 @@ namespace ElectricFieldVis.Controller
         {
             _renderer = new Renderer(_particles, _probe, this.ClientSize, grid_w, grid_h);
         }
+        
 
         /// <summary>
         /// Init Controller by starting timer.
@@ -108,23 +111,56 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem stats = new ToolStripMenuItem("Stats");
             ToolStripMenuItem customizer = new ToolStripMenuItem("Customize");
             ToolStripMenuItem help = new ToolStripMenuItem("Helper");
+            ToolStripMenuItem scenario = new ToolStripMenuItem("Scenario");
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
             ToolStripMenuItem scale_to_fit = new ToolStripMenuItem("Scale To Fit");
             help.DropDownItems.AddRange([center, scale_to_fit]);
 
+            // SCENARIO-submenu
+            ToolStripMenuItem load = new ToolStripMenuItem("Load");
+            ToolStripMenuItem save = new ToolStripMenuItem("Save");
+            scenario.DropDownItems.AddRange([load, save]);
 
+            // main menu
             stats.Click += Click_stats;
             customizer.Click += Click_custom;
 
+            // help submenu
             center.Click += Click_center;
             scale_to_fit.Click += Click_scale_to_fit;
+
+            // scenario submenu
+            load.Click += Click_load;
+            save.Click += Click_save;
 
             _menuStrip.Items.Add(stats);
             _menuStrip.Items.Add(customizer);
             _menuStrip.Items.Add(help);
+            _menuStrip.Items.Add(scenario);
             
+        }
+
+        private void Click_load(object? sender, EventArgs e)
+        {
+            var sc = Screen.FromControl(this).WorkingArea;
+            var w = sc.Width;
+            var h = sc.Height;
+            var wid = 200;
+            var hgt = 10;
+            var pt = new Point((w - wid)/2, (h - hgt)/2);
+            var newScen = InputBox.Show("Which Scenario Shoul Load",pt,_scenario,wid,hgt);
+            
+            InitializeModel(newScen);
+            _renderer._particles = this._particles;
+            _renderer._mainProbe = this._probe;
+            _renderer._secondProbe = null;
+        }
+
+        private void Click_save(object? sender, EventArgs e)
+        {
+            Scenario.SaveScenario();
         }
 
         private void Click_scale_to_fit(object? sender, EventArgs e)

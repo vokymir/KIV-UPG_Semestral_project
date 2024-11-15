@@ -15,8 +15,8 @@ namespace ElectricFieldVis.View
     /// </summary>
     public class Renderer
     {
-        private List<Particle> _particles;
-        private Probe _mainProbe;
+        public List<Particle> _particles;
+        public Probe _mainProbe;
         private CustomizerForm? _customizerForm;
         private bool _particleDynamicWidth = true;
         private Color _particlePositiveColor = Color.Red;
@@ -484,8 +484,8 @@ namespace ElectricFieldVis.View
                 _grid_points = CalculateGridPoints();
             }
         }
-        private int _grid_w;
-        private int _grid_h;
+        public int _grid_w;
+        public int _grid_h;
 
         public Point[,] CalculateGridPoints()
         {

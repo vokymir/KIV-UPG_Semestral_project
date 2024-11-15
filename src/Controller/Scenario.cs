@@ -14,6 +14,7 @@ namespace ElectricFieldVis.Controller
     /// </summary>
     public class Scenario
     {
+        public bool isDefault {  get; set; }
         public List<Particle>? particles { get; set; }
         public Scenario() { }
 
@@ -98,6 +99,11 @@ namespace ElectricFieldVis.Controller
                 Environment.Exit(1);
                 return null;
             }
+        }
+
+        internal static void SaveScenario()
+        {
+            throw new NotImplementedException();
         }
     }
 }
