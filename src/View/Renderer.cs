@@ -549,7 +549,16 @@ namespace ElectricFieldVis.View
 
             Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y - vect.Y / intensity * len));
 
-            g.DrawLine(pen, here, endHere);
+            try
+            {
+                g.DrawLine(pen, here, endHere);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Unreasonably big or small inputs.");
+                Environment.Exit(1);
+            }
+            
         }
 
 

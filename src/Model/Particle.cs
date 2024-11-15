@@ -51,6 +51,7 @@ namespace ElectricFieldVis.Model
                 _expr = _context.CompileGeneric<double>(Expression);
             }
 
+            
             double res = _expr.Evaluate();
             Value = (float)res;
         }
