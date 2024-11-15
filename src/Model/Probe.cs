@@ -14,7 +14,10 @@ namespace ElectricFieldVis.Model
     /// </summary>
     public class Probe
     {
-        public Vector2 position { get; private set; }
+        public Vector2 position { get; set; }
+        // repetition because of loading and saving not working with Vector2
+        public float X {  get;  set; }
+        public float Y { get;  set; }
         public float radius {  get; private set; }
         public float angularVelocity { get; private set; }  
 
@@ -53,6 +56,8 @@ namespace ElectricFieldVis.Model
         {
             float angle = angularVelocity * time;
             position = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+            this.X = position.X;
+            this.Y = position.Y;
         }
 
     }

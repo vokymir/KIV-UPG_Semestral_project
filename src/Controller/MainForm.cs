@@ -17,7 +17,7 @@ namespace ElectricFieldVis.Controller
         private int _fps = 30;
         private StatsForm _statsForm;
         private MenuStrip _menuStrip;
-        public string _scenario;
+        public string _scenarioName = "";
         private Probe? _secondProbe;
 
         /// <summary>
@@ -60,7 +60,10 @@ namespace ElectricFieldVis.Controller
             _particles = scenario.particles;
             _probe = new Probe();
             _secondProbe = scenario.secondProbe;
-            _scenario = scenario.isDefault ? "0" : scenarioName;
+            _renderer._secondProbe = _secondProbe;
+            _scenarioName = scenario.isDefault ? "0" : scenarioName;
+            
+            
         }
 
         /// <summary>
@@ -153,12 +156,12 @@ namespace ElectricFieldVis.Controller
             var wid = 200;
             var hgt = 10;
             var pt = new Point((w - wid)/2, (h - hgt)/2);
-            var newScen = InputBox.Show("Which Scenario Should Load",pt,_scenario,wid,hgt);
+            var newScen = InputBox.Show("Which Scenario Should Load",pt,_scenarioName,wid,hgt);
             
             InitializeModel(newScen);
             _renderer._particles = this._particles;
             _renderer._mainProbe = this._probe;
-            _renderer._secondProbe = null;
+            _renderer._secondProbe = this._secondProbe;
         }
 
         private void Click_save(object? sender, EventArgs e)
@@ -175,7 +178,11 @@ namespace ElectricFieldVis.Controller
             var pt = new Point((w - wid) / 2, (h - hgt) / 2);
             string name = InputBox.Show("Name this scenario", pt);
 
-            Scenario.SaveScenario(sc, name);
+            bool res = Scenario.SaveScenario(sc, name);
+            if (res)
+            {
+                _scenarioName = name;
+            }
         }
 
         private void Click_scale_to_fit(object? sender, EventArgs e)
@@ -236,6 +243,12 @@ namespace ElectricFieldVis.Controller
             _timeElapsed += deltaTime;
 
             _probe.UpdatePosition(_timeElapsed);
+
+            if (_secondProbe != null)
+            {
+                _secondProbe.UpdatePosition(_timeElapsed);
+            }
+
             UpdateParticleValues(_timeElapsed);
             drawingPanel.Invalidate();
             
@@ -302,6 +315,7 @@ namespace ElectricFieldVis.Controller
             Probe probe = new Probe(click, 0, Color.Aqua);
 
             _renderer._secondProbe = probe;
+            this._secondProbe = probe;
 
         }
 

@@ -69,6 +69,13 @@ namespace ElectricFieldVis.Controller
                 particle.trueInit();
             }
 
+            if (scenario.secondProbe != null)
+            {
+                float x = scenario.secondProbe.X;
+                float y = scenario.secondProbe.Y;
+                scenario.secondProbe.position = new System.Numerics.Vector2(x, y);
+            }
+
             return scenario;
         }
 
@@ -102,7 +109,8 @@ namespace ElectricFieldVis.Controller
             }
         }
 
-        internal static void SaveScenario(Scenario s, string name)
+        //return true if success
+        internal static bool SaveScenario(Scenario s, string name)
         {
             string filePath = $"Scenarios/{name}.json";
 
@@ -121,7 +129,9 @@ namespace ElectricFieldVis.Controller
             catch
             {
                 MessageBox.Show("Scenario with this name already exists. Please choose another name and try again.");
+                return false;
             }            
+            return true;
         }
     }
 }
