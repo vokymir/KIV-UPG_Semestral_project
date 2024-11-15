@@ -234,8 +234,23 @@ namespace ElectricFieldVis.Controller
             }
             if (e.Button == MouseButtons.Left)
             {
-                HandleParticleOnClick(e);
+                // if not hit any particle
+                if (! HandleParticleOnClick(e))
+                {
+                    CreateStaticProbe(e);
+                }
+                
             }
+
+        }
+
+        private void CreateStaticProbe(MouseEventArgs e)
+        {
+            Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+
+            Probe probe = new Probe(click, 0, Color.Aqua);
+
+            _renderer._secondProbe = probe;
 
         }
 
@@ -278,7 +293,8 @@ namespace ElectricFieldVis.Controller
             }
         }
 
-        private void HandleParticleOnClick(MouseEventArgs e)
+        // return true if done something
+        private bool HandleParticleOnClick(MouseEventArgs e)
         {
             Particle? the_clicked_one = null;
 
@@ -305,7 +321,7 @@ namespace ElectricFieldVis.Controller
 
             if (the_clicked_one == null)
             {
-                return;
+                return false;
             }
 
             
@@ -317,18 +333,18 @@ namespace ElectricFieldVis.Controller
 
                 if (input == "")
                 {
-                    return;
+                    return true;
                 }
 
                 the_clicked_one.setExpression(input);
 
-                return;
+                return true;
             }
 
             // if intention to move particle
             _moving_particle = the_clicked_one;
             
-            
+            return true;
         }
 
 

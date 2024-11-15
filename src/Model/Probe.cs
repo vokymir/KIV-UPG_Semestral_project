@@ -30,6 +30,21 @@ namespace ElectricFieldVis.Model
             color = Color.Black;
         }
 
+        public Probe(float X, float Y, float radius, Color clr, float angularVelocity = 0)
+        {
+            this.radius = radius;
+            this.position = new Vector2(X, Y);
+            this.color = clr;
+            this.angularVelocity = angularVelocity;
+        }
+        public Probe(Vector2 pos, float radius, Color clr, float angularVelocity = 0)
+        {
+            this.radius = radius;
+            this.position = pos;
+            this.color = clr;
+            this.angularVelocity = angularVelocity;
+        }
+
         /// <summary>
         /// Updates it's position over time, orbiting around the origin.
         /// </summary>

@@ -22,6 +22,7 @@ namespace ElectricFieldVis.View
         private Color _particlePositiveColor = Color.Red;
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
+        public Probe? _secondProbe = null;
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -255,6 +256,11 @@ namespace ElectricFieldVis.View
             foreach (Particle particle in _particles)
             {
                 DrawParticle(g, particle);
+            }
+
+            if (_secondProbe != null)
+            {
+                DrawProbe(g, _secondProbe);
             }
 
             DrawProbe(g, _mainProbe);
@@ -563,5 +569,14 @@ namespace ElectricFieldVis.View
 
 
         #endregion Grid
+
+        #region Bitmap
+
+        private void DrawBitmap(Graphics g)
+        {
+
+        }
+
+        #endregion Bitmap
     }
 }
