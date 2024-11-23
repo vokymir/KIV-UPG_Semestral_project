@@ -550,7 +550,7 @@ namespace ElectricFieldVis.View
             Vector2 vect = FieldCalculator.CalculateFieldDirection(real_world_here, _particles);
             float intensity = FieldCalculator.CalculateFieldIntensity(vect);
 
-            Pen pen = new Pen(Color.Black, 5);
+            Pen pen = new Pen(Color.DarkGray, 5);
             pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
 
             float len = Math.Min(_grid_w, _grid_h);
