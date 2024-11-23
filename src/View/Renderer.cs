@@ -404,11 +404,11 @@ namespace ElectricFieldVis.View
         #region CustomizerForm
         // Create customizer form and subscribe and handle to all its Events.
 
-        public void ShowCustomizerForm()
+        public void ShowCustomizerForm(Point where)
         {
             if (_customizerForm == null || _customizerForm.IsDisposed)
             {
-                _customizerForm = new CustomizerForm(_mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth);
+                _customizerForm = new CustomizerForm(_mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth, where);
 
                 // Subscribe to the ColorChanged event
                 _customizerForm.ProbeColorChanged += UpdateProbeColor;

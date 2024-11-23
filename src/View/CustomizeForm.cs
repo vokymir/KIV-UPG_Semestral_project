@@ -32,7 +32,7 @@ namespace ElectricFieldVis.View
         /// Customize the visual aspect of an app.
         /// </summary>
         /// <param name="probeColor">Color of the Probe, to set it.</param>
-        public CustomizerForm(Color probeColor, Color particlePositiveColor, Color particleNegativeColor, bool particleDynamicWidth)
+        public CustomizerForm(Color probeColor, Color particlePositiveColor, Color particleNegativeColor, bool particleDynamicWidth, Point startLoc)
         {
             _probeColor = probeColor;
             _particlePositiveColor = particlePositiveColor;
@@ -46,7 +46,8 @@ namespace ElectricFieldVis.View
 
             this.Size = new Size(300, 300);
             this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(0, 300);
+            startLoc.Y += 300;
+            this.Location = startLoc;
 
             set_btnColor(ProbeColor, _probeColor);
             set_btnColor(ParticlePositiveColor, _particlePositiveColor);

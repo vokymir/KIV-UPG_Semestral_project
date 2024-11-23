@@ -99,7 +99,13 @@ namespace ElectricFieldVis.Controller
             if (_statsForm == null || _statsForm.IsDisposed)
             {
                 _statsForm = new StatsForm();
-
+                
+                Point where = new Point(
+                    this.Left,
+                    this.Top
+                );
+                _statsForm.StartPosition = FormStartPosition.Manual;
+                _statsForm.Location = where;
                 _statsForm.Show();
             }
         }
@@ -204,11 +210,16 @@ namespace ElectricFieldVis.Controller
 
         private void Click_custom(object? sender, EventArgs e)
         {
-            _renderer.ShowCustomizerForm();
+            Point where = new Point(
+                this.Left,
+                this.Top
+            );
+            _renderer.ShowCustomizerForm(where);
         }
 
         private void Click_stats(object? sender, EventArgs e)
         {
+
             ShowStatsForm();
         }
 
