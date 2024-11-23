@@ -358,6 +358,13 @@ namespace ElectricFieldVis.Controller
             new_particle.X = click.X;
             new_particle.Y = click.Y;
             new_particle.setExpression(input);
+
+            if (new_particle.Expression == "0")
+            {
+                return ;
+            }
+
+
             this._particles.Add(new_particle);
             this._renderer._particles.Add(new_particle);
         }
