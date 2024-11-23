@@ -15,8 +15,8 @@ namespace ElectricFieldVis.Controller
         static void Main(string[] args)
         {
             string scenarioName = "0";
-            int grid_w = 100;
-            int grid_h = 100;
+            int grid_w = 30;
+            int grid_h = 30;
 
             if (args.Length > 0)
             {
