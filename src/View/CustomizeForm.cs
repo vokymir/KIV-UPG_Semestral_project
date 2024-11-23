@@ -46,7 +46,6 @@ namespace ElectricFieldVis.View
 
             this.Size = new Size(300, 300);
             this.StartPosition = FormStartPosition.Manual;
-            startLoc.Y += 300;
             this.Location = startLoc;
 
             set_btnColor(ProbeColor, _probeColor);

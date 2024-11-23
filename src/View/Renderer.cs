@@ -421,6 +421,8 @@ namespace ElectricFieldVis.View
 
                 _customizerForm.Show();
             }
+            _customizerForm.Activate();
+            _customizerForm.Focus();
         }
 
         private void UpdateStaticProbesVisibility(bool obj)

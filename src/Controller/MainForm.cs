@@ -102,12 +102,14 @@ namespace ElectricFieldVis.Controller
                 
                 Point where = new Point(
                     this.Left,
-                    this.Top
+                    this.Top + 60
                 );
                 _statsForm.StartPosition = FormStartPosition.Manual;
                 _statsForm.Location = where;
                 _statsForm.Show();
             }
+            _statsForm.Activate();
+            _statsForm.Focus();
         }
 
         private void CreateMenu()
@@ -211,8 +213,8 @@ namespace ElectricFieldVis.Controller
         private void Click_custom(object? sender, EventArgs e)
         {
             Point where = new Point(
-                this.Left,
-                this.Top
+                this.Left + 300,
+                this.Top + 60
             );
             _renderer.ShowCustomizerForm(where);
         }
