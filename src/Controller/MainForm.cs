@@ -3,6 +3,7 @@ using ElectricFieldVis.View;
 using System.Drawing;
 using System.Numerics;
 using System.Windows.Forms;
+using static System.Windows.Forms.DataFormats;
 
 namespace ElectricFieldVis.Controller
 {
@@ -145,15 +146,21 @@ namespace ElectricFieldVis.Controller
         }
 
         private void Click_load(object? sender, EventArgs e)
-        {
-            var sc = Screen.FromControl(this).WorkingArea;
-            var w = sc.Width;
-            var h = sc.Height;
+        { 
             var wid = 200;
             var hgt = 10;
-            var pt = new Point((w - wid)/2, (h - hgt)/2);
-            var newScen = InputBox.Show("Which Scenario Should Load",pt,_scenarioName,wid,hgt);
+            Point here = new Point(
+                this.Left + (this.Width - wid) / 2,
+                this.Top + (this.Height - hgt) / 2
+            );
+            var newScen = InputBox.Show("Which Scenario Should Load",here,_scenarioName,wid,hgt);
             
+            // empty or esc
+            if (newScen == "")
+            {
+                return;
+            }
+
             InitializeModel(newScen);
             _renderer._particles = this._particles;
             _renderer._mainProbe = this._probe;
@@ -164,13 +171,19 @@ namespace ElectricFieldVis.Controller
             Scenario sc = new Scenario();
             sc.particles = this._particles;
 
-            var scr = Screen.FromControl(this).WorkingArea;
-            var w = scr.Width;
-            var h = scr.Height;
             var wid = 200;
             var hgt = 10;
-            var pt = new Point((w - wid) / 2, (h - hgt) / 2);
-            string name = InputBox.Show("Name this scenario", pt);
+            Point here = new Point(
+                this.Left + (this.Width - wid) / 2,
+                this.Top + (this.Height - hgt) / 2
+            );
+            string name = InputBox.Show("Name this scenario", here);
+
+            // empty or esc
+            if (name == "")
+            {
+                return ;
+            }
 
             bool res = Scenario.SaveScenario(sc, name);
             if (res)
@@ -287,13 +300,53 @@ namespace ElectricFieldVis.Controller
             if (e.Button == MouseButtons.Left)
             {
                 // if not hit any particle
-                if (! HandleParticleOnClick(e))
+                Particle? the_one = WasParticleClicked(e);
+                if ( the_one == null)
                 {
-                    CreateStaticProbe(e);
+                    if (Control.ModifierKeys == Keys.Control)
+                    {
+                        CreateNewParticle(e);
+                    }
+                    else
+                    {
+                        CreateStaticProbe(e);
+                    }
+                }
+                else
+                {
+                    HandleParticleOnClick(e, the_one);
                 }
                 
             }
 
+        }
+
+        private void CreateNewParticle(MouseEventArgs e)
+        {
+            Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+
+            Point here = this.PointToScreen(e.Location);
+
+            string input = InputBox.Show("Enter Particle Value:",here);
+
+            // esc inputbox
+            if (input == "")
+            {
+                return;
+            }
+            // destroy particle
+            if (input.Contains('x'))
+            {
+                return;
+            }
+
+            Particle new_particle = new Particle();
+            new_particle.trueInit();
+            new_particle.X = click.X;
+            new_particle.Y = click.Y;
+            new_particle.setExpression(input);
+            this._particles.Add(new_particle);
+            this._renderer._particles.Add(new_particle);
         }
 
         private void CreateStaticProbe(MouseEventArgs e)
@@ -344,13 +397,12 @@ namespace ElectricFieldVis.Controller
                 _zooming = false;
             }
         }
-
-        // return true if done something
-        private bool HandleParticleOnClick(MouseEventArgs e)
+        // return clicked particle or null
+        private Particle? WasParticleClicked(MouseEventArgs e)
         {
             Particle? the_clicked_one = null;
 
-            Vector2 click = _renderer.GetRealWorldCoords( new Vector2(e.X, e.Y));
+            Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
 
             for (int i = 0; i < _particles.Count; i++)
             {
@@ -371,20 +423,28 @@ namespace ElectricFieldVis.Controller
                 }
             }
 
-            if (the_clicked_one == null)
-            {
-                return false;
-            }
+            return the_clicked_one;
+        }
 
+        // return true if done something
+        private bool HandleParticleOnClick(MouseEventArgs e, Particle the_clicked_one)
+        {
             
             if (Form.ModifierKeys == Keys.Control)
             {
                 // if intention to change value of particle
-                Point here = new Point(e.X + this.Location.X, e.Y + this.Location.Y);
+                Point here = this.PointToScreen(e.Location);
                 string input = InputBox.Show("", here, the_clicked_one.Expression);
 
+                // esc inputbox
                 if (input == "")
                 {
+                    return true;
+                }
+                // destroy particle
+                if (input.Contains('x'))
+                {
+                    DestroyParticle(the_clicked_one);
                     return true;
                 }
 
@@ -397,6 +457,12 @@ namespace ElectricFieldVis.Controller
             _moving_particle = the_clicked_one;
             
             return true;
+        }
+
+        private void DestroyParticle(Particle the_clicked_one)
+        {
+            this._particles.Remove(the_clicked_one);
+            this._renderer._particles.Remove(the_clicked_one);
         }
 
 
