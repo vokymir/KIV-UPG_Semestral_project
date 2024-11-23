@@ -302,7 +302,7 @@ namespace ElectricFieldVis.Controller
         private Vector2 _map_position_before = Vector2.Zero;
         private bool _moving_map = false;
         private Particle? _moving_particle = null;
-        // MOVING PARTICLE IS NOT MOVING BUT VISUALLY IS WHEN OUT OF THE WINDOW, BUT ON THE SCREEN - kdyz presouvam particle mimo okno, tak ho tam sice presunu, ale sipky si mysli, ze je jinde
+        
         private void MainForm_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -390,6 +390,11 @@ namespace ElectricFieldVis.Controller
             }
             if (_moving_particle != null)
             {
+                if (e.X <= this.drawingPanel.Left || e.Y <= this.drawingPanel.Top ||
+                    e.X >= this.drawingPanel.Right || e.Y >= this.drawingPanel.Bottom)    
+                {
+                    return;
+                }
                 Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
                 _moving_particle.X = click.X;
                 _moving_particle.Y = click.Y;
