@@ -27,7 +27,7 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
         public Probe? _secondProbe = null;
-        private int _bitmap_chunk_size = 10;
+        private int _bitmap_chunk_size = 50;
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -659,9 +659,7 @@ namespace ElectricFieldVis.View
             }
         }*/
 
-        ////////////////////////////////////
-
-        private void DrawBitmap(Graphics g)
+        /*private void DrawBitmap(Graphics g)
         {
             _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
 
@@ -695,122 +693,17 @@ namespace ElectricFieldVis.View
                         }
                     }
                 }
-                /*
-                // Option 2: Apply gaussian blur
-                using (var blur = new GaussianBlur(bmp))
-                {
-                    blur.Sigma = 3; // Adjust blur amount
-                    blur.Apply();
-                }*/
 
                 // Draw the final bitmap to the graphics object
                 g.DrawImage(bmp, 0, 0);
             }
         }
+        */
 
-        // Helper class for Gaussian Blur
-        public class GaussianBlur
+        private void DrawBitmap(Graphics g)
         {
-            private readonly Bitmap _source;
-            public float Sigma { get; set; } = 3.0f;
-
-            public GaussianBlur(Bitmap source)
-            {
-                _source = source;
-            }
-
-            public void Apply()
-            {
-                int radius = (int)Math.Ceiling(Sigma * 3);
-                var effect = new ColorMatrix();
-                
-                    var kernel = CreateGaussianKernel(radius, Sigma);
-
-                    // Apply horizontal blur
-                    ApplyConvolution(_source, kernel, true);
-
-                    // Apply vertical blur
-                    ApplyConvolution(_source, kernel, false);
-                
-            }
-
-            private float[] CreateGaussianKernel(int radius, float sigma)
-            {
-                float[] kernel = new float[radius * 2 + 1];
-                float sum = 0;
-
-                for (int i = -radius; i <= radius; i++)
-                {
-                    kernel[i + radius] = (float)Math.Exp(-(i * i) / (2 * sigma * sigma));
-                    sum += kernel[i + radius];
-                }
-
-                // Normalize
-                for (int i = 0; i < kernel.Length; i++)
-                {
-                    kernel[i] /= sum;
-                }
-
-                return kernel;
-            }
-
-            private void ApplyConvolution(Bitmap bmp, float[] kernel, bool horizontal)
-            {
-                var bmpData = bmp.LockBits(
-                    new Rectangle(0, 0, bmp.Width, bmp.Height),
-                    ImageLockMode.ReadWrite,
-                    PixelFormat.Format32bppArgb);
-
-                int stride = bmpData.Stride;
-                int bytes = Math.Abs(stride) * bmp.Height;
-                byte[] rgba = new byte[bytes];
-                byte[] result = new byte[bytes];
-
-                Marshal.Copy(bmpData.Scan0, rgba, 0, bytes);
-
-                // Apply convolution
-                Parallel.For(0, bmp.Height, y =>
-                {
-                    for (int x = 0; x < bmp.Width; x++)
-                    {
-                        float r = 0, g = 0, b = 0, a = 0;
-                        int index = y * stride + x * 4;
-
-                        for (int k = -kernel.Length / 2; k <= kernel.Length / 2; k++)
-                        {
-                            int px = horizontal ? Math.Min(Math.Max(x + k, 0), bmp.Width - 1) : x;
-                            int py = horizontal ? y : Math.Min(Math.Max(y + k, 0), bmp.Height - 1);
-                            int idx = py * stride + px * 4;
-                            float weight = kernel[k + kernel.Length / 2];
-
-                            b += rgba[idx] * weight;
-                            g += rgba[idx + 1] * weight;
-                            r += rgba[idx + 2] * weight;
-                            a += rgba[idx + 3] * weight;
-                        }
-
-                        result[index] = (byte)Math.Min(255, Math.Max(0, b));
-                        result[index + 1] = (byte)Math.Min(255, Math.Max(0, g));
-                        result[index + 2] = (byte)Math.Min(255, Math.Max(0, r));
-                        result[index + 3] = (byte)Math.Min(255, Math.Max(0, a));
-                    }
-                });
-
-                Marshal.Copy(result, 0, bmpData.Scan0, bytes);
-                bmp.UnlockBits(bmpData);
-            }
+            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
         }
-
-
-
-
-
-
-
-
-
-
-        ////////////////////////////////////
 
         private void DrawBitmapLegend(Graphics g)
         {
