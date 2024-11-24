@@ -247,6 +247,7 @@ namespace ElectricFieldVis.View
         /// <param name="clientSize"></param>
         public void Render(Graphics g, Size clientSize)
         {
+
             DrawBitmap(g);
 
             if (_showGrid)
@@ -498,6 +499,7 @@ namespace ElectricFieldVis.View
         public int _grid_w;
         public int _grid_h;
 
+        // Calculates canvas/simulation - not real coordinates
         public Point[,] CalculateGridPoints(int override_value = 0)
         {
             int vertical_offset = 0;// width_px / 2;
@@ -593,13 +595,21 @@ namespace ElectricFieldVis.View
 
         private void DrawBitmap(Graphics g)
         {
-            foreach (Point p in Bitmap_points)
-            {
-                float intensity = FieldCalculator.CalculateFieldIntensity(FieldCalculator.CalculateFieldDirection(new Vector2(p.X,p.Y), _particles));
-                Color clr = ConvertIntensityToColor(intensity);
-                SolidBrush brush = new SolidBrush(clr);
+            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
 
-                g.FillEllipse(brush,p.X,p.Y,_bitmap_chunk_size,_bitmap_chunk_size);
+            int width = Bitmap_points.GetLength(0);
+            int height = Bitmap_points.GetLength(1);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    Color clr = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
+                    Brush brush = new SolidBrush(clr);
+                    Point pt = Bitmap_points[x, y];
+                    g.FillEllipse(brush, pt.X, pt.Y, _bitmap_chunk_size, _bitmap_chunk_size);
+                
+                }
             }
         }
 
@@ -679,6 +689,50 @@ namespace ElectricFieldVis.View
             }
         }
 
+        float[,]? _bmp_pts_intensity = null;
+
+        float[,] Bitmap_points_intensity
+        {
+            get
+            {
+                if (_bmp_pts_intensity == null)
+                {
+                    _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+                }
+                return _bmp_pts_intensity;
+            }
+            set
+            {
+                _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+            }
+        }
+
+        float[,] CalculateBitmapGridIntensity(Point[,] points)
+        {
+            int width = points.GetLength(0);
+            int height = points.GetLength(1);
+
+            float[,] res = new float[width, height];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var pt = points[x, y];
+                    Vector2 sim_coords = new Vector2(pt.X, pt.Y);
+                    var real_coords = GetRealWorldCoords(sim_coords);
+
+                    res[x, y] = FieldCalculator.CalculateFieldIntensity(
+                        FieldCalculator.CalculateFieldDirection(
+                            real_coords,
+                            _particles
+                        )
+                    );
+                }
+            }
+
+            return res;
+        }
         #endregion Bitmap
     }
 }
