@@ -516,7 +516,7 @@ namespace ElectricFieldVis.View
             int max_h = this._curr_client_size.Height;
 
             Point[,] points = new Point[horizontal_count,vertical_count];
-            //lol
+            
             for (int i = 0; i < horizontal_count; i++)
             {
                 for (int j = 0; j < vertical_count; j++)
