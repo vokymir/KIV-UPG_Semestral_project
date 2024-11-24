@@ -23,6 +23,7 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
         public Probe? _secondProbe = null;
+        private int _bitmap_chunk_size = 30;
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -244,6 +245,8 @@ namespace ElectricFieldVis.View
         /// <param name="clientSize"></param>
         public void Render(Graphics g, Size clientSize)
         {
+            DrawBitmap(g);
+
             if (_showGrid)
             {
                 DrawGrid(g, Grid_points);
@@ -264,9 +267,13 @@ namespace ElectricFieldVis.View
             }
 
             DrawProbe(g, _mainProbe);
+
+            DrawBitmapLegend(g);
         }
 
         
+
+
 
         /// <summary>
         /// Draw one particle as filled elipse with text value and color distinction for plus and minus.
@@ -489,13 +496,21 @@ namespace ElectricFieldVis.View
         public int _grid_w;
         public int _grid_h;
 
-        public Point[,] CalculateGridPoints()
+        public Point[,] CalculateGridPoints(int override_value = 0)
         {
             int vertical_offset = 0;// width_px / 2;
             int horizontal_offset = 0;// height_px / 2;
 
-            int vertical_count = (this._curr_client_size.Width + vertical_offset) / _grid_w + 1 + 1; // +1 for integer division CEILING
-            int horizontal_count = (this._curr_client_size.Height + horizontal_offset) / _grid_h + 1 + 1; // second +1 for overflow - too have grid slightly bigger than canvas
+            int wid = _grid_w;
+            int hig = _grid_h;
+            if (override_value != 0)
+            {
+                wid = override_value;
+                hig = override_value;
+            }
+
+            int vertical_count = (this._curr_client_size.Width + vertical_offset) / hig + 1 + 1; // +1 for integer division CEILING
+            int horizontal_count = (this._curr_client_size.Height + horizontal_offset) / wid + 1 + 1; // second +1 for overflow - too have grid slightly bigger than canvas
 
             int max_w = this._curr_client_size.Width;
             int max_h = this._curr_client_size.Height;
@@ -506,7 +521,7 @@ namespace ElectricFieldVis.View
             {
                 for (int j = 0; j < vertical_count; j++)
                 {
-                    points[i, j] = new Point(j * _grid_w + vertical_offset, i * _grid_h + horizontal_offset);
+                    points[i, j] = new Point(j * wid + vertical_offset, i * hig + horizontal_offset);
                 }
             }
 
@@ -577,6 +592,36 @@ namespace ElectricFieldVis.View
         private void DrawBitmap(Graphics g)
         {
 
+        }
+
+        private void DrawBitmapLegend(Graphics g)
+        {
+            // TODO
+        }
+
+        private Color ConvertIntensityToColor(float intensity)
+        {
+
+
+            return Color.Wheat;
+        }
+
+        Point[,]? _bitmap_points = null;
+
+        Point[,] Bitmap_points
+        {
+            get
+            {
+                if (_bitmap_points == null)
+                {
+                    _bitmap_points = CalculateGridPoints();
+                }
+                return _bitmap_points;
+            }
+            set
+            {
+                _bitmap_points = CalculateGridPoints();
+            }
         }
 
         #endregion Bitmap
