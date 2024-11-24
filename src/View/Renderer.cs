@@ -1,6 +1,8 @@
 ﻿using ElectricFieldVis.Model;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Numerics;
@@ -8,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
 
 namespace ElectricFieldVis.View
 {
@@ -24,7 +27,7 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
         public Probe? _secondProbe = null;
-        private int _bitmap_chunk_size = 50;
+        private int _bitmap_chunk_size = 10;
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -593,7 +596,7 @@ namespace ElectricFieldVis.View
 
         #region Bitmap
 
-        private void DrawBitmap(Graphics g)
+        /*private void DrawBitmap(Graphics g)
         {
             _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
 
@@ -607,11 +610,207 @@ namespace ElectricFieldVis.View
                     Color clr = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
                     Brush brush = new SolidBrush(clr);
                     Point pt = Bitmap_points[x, y];
-                    g.FillEllipse(brush, pt.X, pt.Y, _bitmap_chunk_size, _bitmap_chunk_size);
-                
+                    g.FillRectangle(brush, pt.X, pt.Y, _bitmap_chunk_size, _bitmap_chunk_size);
                 }
             }
+        }*/
+
+        /*private void DrawBitmap(Graphics g)
+        {
+            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+
+            int finalWidth = this._curr_client_size.Width;
+            int finalHeight = this._curr_client_size.Height;
+            float size = (float)_bitmap_chunk_size;
+
+            using (Bitmap bmp = new Bitmap(finalWidth, finalHeight))
+            using (Graphics bmpG = Graphics.FromImage(bmp))
+            {
+                bmpG.SmoothingMode = SmoothingMode.AntiAlias;
+
+                for (int x = 0; x < Bitmap_points.GetLength(0); x++)
+                {
+                    for (int y = 0; y < Bitmap_points.GetLength(1); y++)
+                    {
+                        Color centerColor = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
+                        Color transparentColor = Color.FromArgb(0, centerColor);
+                        Point pt = Bitmap_points[x, y];
+
+                        using (var gradient = new PathGradientBrush(new PointF[] {
+                            new PointF(pt.X - size/2, pt.Y - size/2),
+                            new PointF(pt.X + size/2, pt.Y - size/2),
+                            new PointF(pt.X + size/2, pt.Y + size/2),
+                            new PointF(pt.X - size/2, pt.Y + size/2)
+                            }))
+                        {
+                            gradient.CenterColor = centerColor;
+                            //gradient.SurroundColors = new Color[] { transparentColor };
+                            gradient.FocusScales = new PointF(1f, 1f);
+                            bmpG.FillRectangle(gradient,
+                            pt.X - size / 2,
+                            pt.Y - size / 2,
+                                size,
+                                size);
+                        }
+                    }
+                }
+
+                g.DrawImage(bmp, 0, 0);
+            }
+        }*/
+
+        ////////////////////////////////////
+
+        private void DrawBitmap(Graphics g)
+        {
+            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+
+            // Create a bitmap at a higher resolution than the grid
+            int scaleFactor = 2; // Increase this for smoother output
+            int finalWidth = this._curr_client_size.Width;
+            int finalHeight = this._curr_client_size.Height;
+
+            using (Bitmap bmp = new Bitmap(finalWidth, finalHeight))
+            using (Graphics bmpG = Graphics.FromImage(bmp))
+            {
+                // Enable anti-aliasing
+                bmpG.SmoothingMode = SmoothingMode.AntiAlias;
+                bmpG.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                // Option 1: Draw smooth circles instead of rectangles
+                for (int x = 0; x < Bitmap_points.GetLength(0); x++)
+                {
+                    for (int y = 0; y < Bitmap_points.GetLength(1); y++)
+                    {
+                        Color clr = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
+                        using (Brush brush = new SolidBrush(Color.FromArgb(200, clr))) // Add some transparency
+                        {
+                            Point pt = Bitmap_points[x, y];
+                            float size = _bitmap_chunk_size * 1.2f; // Slightly larger than chunk size for overlap
+                            bmpG.FillRectangle(brush,
+                                pt.X - size / 2,
+                                pt.Y - size / 2,
+                                size,
+                                size);
+                        }
+                    }
+                }
+                /*
+                // Option 2: Apply gaussian blur
+                using (var blur = new GaussianBlur(bmp))
+                {
+                    blur.Sigma = 3; // Adjust blur amount
+                    blur.Apply();
+                }*/
+
+                // Draw the final bitmap to the graphics object
+                g.DrawImage(bmp, 0, 0);
+            }
         }
+
+        // Helper class for Gaussian Blur
+        public class GaussianBlur
+        {
+            private readonly Bitmap _source;
+            public float Sigma { get; set; } = 3.0f;
+
+            public GaussianBlur(Bitmap source)
+            {
+                _source = source;
+            }
+
+            public void Apply()
+            {
+                int radius = (int)Math.Ceiling(Sigma * 3);
+                var effect = new ColorMatrix();
+                
+                    var kernel = CreateGaussianKernel(radius, Sigma);
+
+                    // Apply horizontal blur
+                    ApplyConvolution(_source, kernel, true);
+
+                    // Apply vertical blur
+                    ApplyConvolution(_source, kernel, false);
+                
+            }
+
+            private float[] CreateGaussianKernel(int radius, float sigma)
+            {
+                float[] kernel = new float[radius * 2 + 1];
+                float sum = 0;
+
+                for (int i = -radius; i <= radius; i++)
+                {
+                    kernel[i + radius] = (float)Math.Exp(-(i * i) / (2 * sigma * sigma));
+                    sum += kernel[i + radius];
+                }
+
+                // Normalize
+                for (int i = 0; i < kernel.Length; i++)
+                {
+                    kernel[i] /= sum;
+                }
+
+                return kernel;
+            }
+
+            private void ApplyConvolution(Bitmap bmp, float[] kernel, bool horizontal)
+            {
+                var bmpData = bmp.LockBits(
+                    new Rectangle(0, 0, bmp.Width, bmp.Height),
+                    ImageLockMode.ReadWrite,
+                    PixelFormat.Format32bppArgb);
+
+                int stride = bmpData.Stride;
+                int bytes = Math.Abs(stride) * bmp.Height;
+                byte[] rgba = new byte[bytes];
+                byte[] result = new byte[bytes];
+
+                Marshal.Copy(bmpData.Scan0, rgba, 0, bytes);
+
+                // Apply convolution
+                Parallel.For(0, bmp.Height, y =>
+                {
+                    for (int x = 0; x < bmp.Width; x++)
+                    {
+                        float r = 0, g = 0, b = 0, a = 0;
+                        int index = y * stride + x * 4;
+
+                        for (int k = -kernel.Length / 2; k <= kernel.Length / 2; k++)
+                        {
+                            int px = horizontal ? Math.Min(Math.Max(x + k, 0), bmp.Width - 1) : x;
+                            int py = horizontal ? y : Math.Min(Math.Max(y + k, 0), bmp.Height - 1);
+                            int idx = py * stride + px * 4;
+                            float weight = kernel[k + kernel.Length / 2];
+
+                            b += rgba[idx] * weight;
+                            g += rgba[idx + 1] * weight;
+                            r += rgba[idx + 2] * weight;
+                            a += rgba[idx + 3] * weight;
+                        }
+
+                        result[index] = (byte)Math.Min(255, Math.Max(0, b));
+                        result[index + 1] = (byte)Math.Min(255, Math.Max(0, g));
+                        result[index + 2] = (byte)Math.Min(255, Math.Max(0, r));
+                        result[index + 3] = (byte)Math.Min(255, Math.Max(0, a));
+                    }
+                });
+
+                Marshal.Copy(result, 0, bmpData.Scan0, bytes);
+                bmp.UnlockBits(bmpData);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        ////////////////////////////////////
 
         private void DrawBitmapLegend(Graphics g)
         {
@@ -620,8 +819,8 @@ namespace ElectricFieldVis.View
 
         private Color ConvertIntensityToColor(float intensity)
         {
-            double midpoint = 9.0;
-            double scale = 2.0;
+            double midpoint = 0.0;
+            double scale = 10.0;
             double value = (double) intensity;
             double normalized = 1.0 / (1.0 + Math.Exp(-(value - midpoint) / scale));
 
@@ -722,17 +921,49 @@ namespace ElectricFieldVis.View
                     Vector2 sim_coords = new Vector2(pt.X, pt.Y);
                     var real_coords = GetRealWorldCoords(sim_coords);
 
-                    res[x, y] = FieldCalculator.CalculateFieldIntensity(
-                        FieldCalculator.CalculateFieldDirection(
+                    Vector2 dir = FieldCalculator.CalculateFieldDirection(
                             real_coords,
                             _particles
-                        )
-                    );
+                        );
+
+                    res[x, y] = FieldCalculator.CalculateFieldIntensity(dir) / 1E+09f;
+
+                    Particle? nearest_particle = GetNearestParticle(real_coords);
+
+                    if (nearest_particle == null)
+                    {
+                        continue;
+                    }
+                    res[x,y] *= nearest_particle.Value > 0 ? 1f : -1f;
                 }
             }
 
             return res;
         }
+
+        Particle? GetNearestParticle(Vector2 realLifeCoords)
+        {
+            Particle res = null;
+            double distance = double.MaxValue;
+            foreach (var particle in _particles)
+            {
+                double curr_dist = Math.Sqrt(
+                    Math.Pow(realLifeCoords.X - particle.X, 2) +
+                    Math.Pow(realLifeCoords.Y - particle.Y, 2)
+                );
+
+                if (curr_dist < distance)
+                {
+                    distance = curr_dist;
+                    res = particle;
+                }
+            }
+
+            
+
+            return res;
+        }
+    
         #endregion Bitmap
     }
 }
