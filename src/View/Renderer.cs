@@ -177,6 +177,7 @@ namespace ElectricFieldVis.View
             _curr_client_size = newClientSize;
 
             _grid_points = CalculateGridPoints();
+            _bitmap_points = CalculateGridPoints(_bitmap_chunk_size);
         }
 
         /// <summary>
@@ -609,8 +610,8 @@ namespace ElectricFieldVis.View
 
         private Color ConvertIntensityToColor(float intensity)
         {
-            double midpoint = 0.0;
-            double scale = 1.0;
+            double midpoint = 9.0;
+            double scale = 2.0;
             double value = (double) intensity;
             double normalized = 1.0 / (1.0 + Math.Exp(-(value - midpoint) / scale));
 
@@ -620,6 +621,7 @@ namespace ElectricFieldVis.View
 
             return HSVToRGB(hue, saturation, value_hsv);
         }
+
 
         private static Color HSVToRGB(double hue, double saturation, double value)
         {
