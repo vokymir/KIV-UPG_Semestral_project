@@ -287,6 +287,7 @@ namespace ElectricFieldVis.Controller
             
             UpdateStatsForm();
 
+            // miliseconds are the best, dont change it unless change graph X ax label in GraphForm.cs
             int second_divisor = 10;
             if (_secondProbeGraph != null && Math.Floor(currentTime * second_divisor) - Math.Floor(second_divisor * (currentTime - deltaTime)) >= 1)
             {
