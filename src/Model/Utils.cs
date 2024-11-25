@@ -20,7 +20,7 @@ namespace ElectricFieldVis.Model
         /// <param name="e"></param>
         public static void HandleCtrlW(Form form, KeyEventArgs e)
         {
-            if (e.Control && e.KeyCode == Keys.W)
+            if (e.Control && e.KeyCode == Keys.W || e.KeyCode == Keys.Escape)
             {
                 form.Close(); // Close the passed form when Ctrl+W is pressed
             }

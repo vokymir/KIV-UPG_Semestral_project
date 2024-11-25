@@ -36,7 +36,7 @@ namespace ElectricFieldVis.View
             // close on Ctrl+W
             this.KeyDown += (s, e) =>
             {
-                if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.W)
+                if (e.KeyCode == Keys.Escape || e.Control && e.KeyCode == Keys.W)
                 {
                     this.Close();
                 }

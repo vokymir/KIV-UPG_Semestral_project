@@ -18,6 +18,11 @@ namespace ElectricFieldVis.View
         private Probe _probe;
         private Renderer _renderer;
         private DataStreamer _streamer;
+
+        // TODO:
+        // Axes labels
+        // Y axis when big than small be adaptive
+        // X axe what is there? tiks, so make it seconds
         public GraphForm(Probe probe, Renderer rnd)
         {
             InitializeComponent();
@@ -31,8 +36,18 @@ namespace ElectricFieldVis.View
             _streamer = formsPlot1.Plot.Add.DataStreamer(60);
             _streamer.ViewScrollLeft();
 
+            formsPlot1.KeyDown += OnKeyDown;
+
             UpdateGraph();
             Show();
+        }
+
+        private void OnKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape || e.Control && e.KeyCode == Keys.W)
+            {
+                this.Dispose();
+            }
         }
 
         public void UpdateGraph()
