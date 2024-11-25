@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScottPlot.Panels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,33 +14,54 @@ namespace ElectricFieldVis.View
     public partial class LegendForm : Form
     {
         private Renderer _renderer;
-        private Graphics _g;
         public LegendForm(Renderer rnd)
         {
-            this.Size = new Size(200, 300);
+            MinimumSize = new Size(150, 360);
+            MaximumSize = new Size(150, 360);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Text = "Legend";
+            
             InitializeComponent();
 
             _renderer = rnd;
-            _g = panel1.CreateGraphics();
-            
 
-            _renderer.ColorScaleChanged += DrawLegend;
+            // Subscribe to the ColorScaleChanged event
+            _renderer.ColorScaleChanged += () => panel1.Invalidate();
 
-            DrawLegend();
+            // Attach the Paint event to the panel
+            panel1.Paint += Panel1_Paint;
+
+            // close on Ctrl+W
+            this.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Escape || e.KeyCode == Keys.W)
+                {
+                    this.Close();
+                }
+            };
         }
 
-        public void DrawLegend()
+        private void Panel1_Paint(object? sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            DrawLegend(g);
+
+        }
+
+        public void DrawLegend(Graphics g)
         {
             FieldVisualizationLegend fvl = new FieldVisualizationLegend(_renderer.FCM);
 
             Rectangle rect = new Rectangle(
-                0,
-                0,
+                20,
+                10,
                 50,
-                200
+                0
                 );
 
-            fvl.DrawLegend(_g, rect);
+            fvl.DrawLegend(g, rect);
 
             Invalidate();
         }
