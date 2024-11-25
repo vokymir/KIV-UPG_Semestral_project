@@ -27,7 +27,7 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
         public Probe? _secondProbe = null;
-        private int _bitmap_chunk_size = 50;
+        private int _bitmap_chunk_size = 20;
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -594,6 +594,7 @@ namespace ElectricFieldVis.View
 
         #endregion Grid
 
+
         #region Bitmap
 
         /*private void DrawBitmap(Graphics g)
@@ -703,6 +704,20 @@ namespace ElectricFieldVis.View
         private void DrawBitmap(Graphics g)
         {
             _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+
+            int width = Bitmap_points.GetLength(0);
+            int height = Bitmap_points.GetLength(1);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    Color clr = fcm.ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
+                    Brush brush = new SolidBrush(clr);
+                    Point pt = Bitmap_points[x, y];
+                    g.FillRectangle(brush, pt.X -_bitmap_chunk_size / 2, pt.Y - _bitmap_chunk_size / 2, _bitmap_chunk_size, _bitmap_chunk_size);
+                }
+            }
         }
 
         private void DrawBitmapLegend(Graphics g)
@@ -710,59 +725,8 @@ namespace ElectricFieldVis.View
             // TODO
         }
 
-        private Color ConvertIntensityToColor(float intensity)
-        {
-            double midpoint = 0.0;
-            double scale = 10.0;
-            double value = (double) intensity;
-            double normalized = 1.0 / (1.0 + Math.Exp(-(value - midpoint) / scale));
-
-            double hue = 240 - (normalized * 240);
-            double saturation = 1.0;
-            double value_hsv = 1.0;
-
-            return HSVToRGB(hue, saturation, value_hsv);
-        }
-
-
-        private static Color HSVToRGB(double hue, double saturation, double value)
-        {
-            double c = value * saturation;
-            double x = c * (1 - Math.Abs((hue / 60) % 2 - 1));
-            double m = value - c;
-
-            double r, g, b;
-            if (hue < 60)
-            {
-                r = c; g = x; b = 0;
-            }
-            else if (hue < 120)
-            {
-                r = x; g = c; b = 0;
-            }
-            else if (hue < 180)
-            {
-                r = 0; g = c; b = x;
-            }
-            else if (hue < 240)
-            {
-                r = 0; g = x; b = c;
-            }
-            else if (hue < 300)
-            {
-                r = x; g = 0; b = c;
-            }
-            else
-            {
-                r = c; g = 0; b = x;
-            }
-
-            return Color.FromArgb(
-                (int)((r + m) * 255),
-                (int)((g + m) * 255),
-                (int)((b + m) * 255));
-        }
-
+        private FieldColorMapper fcm = new FieldColorMapper(-1E+2, 1E+2,FieldColorMapper.ColorScale.Thermal);
+        
         Point[,]? _bitmap_points = null;
 
         Point[,] Bitmap_points
@@ -820,14 +784,6 @@ namespace ElectricFieldVis.View
                         );
 
                     res[x, y] = FieldCalculator.CalculateFieldIntensity(dir) / 1E+09f;
-
-                    Particle? nearest_particle = GetNearestParticle(real_coords);
-
-                    if (nearest_particle == null)
-                    {
-                        continue;
-                    }
-                    res[x,y] *= nearest_particle.Value > 0 ? 1f : -1f;
                 }
             }
 

@@ -78,5 +78,6 @@ namespace ElectricFieldVis.Model
 
             return intensity;
         }
+
     }
 }
