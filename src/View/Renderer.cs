@@ -281,8 +281,6 @@ namespace ElectricFieldVis.View
             }
 
             DrawProbe(g, _mainProbe);
-
-            DrawBitmapLegend(g);
         }
 
         
@@ -447,10 +445,11 @@ namespace ElectricFieldVis.View
             _customizerForm.Focus();
         }
 
+        public event Action ColorScaleChanged;
         private void UpdateColorScale(FieldColorMapper.ColorScale scale)
         {
             fcm.Color_scale = scale;
-            _legend = new FieldVisualizationLegend(fcm);
+            ColorScaleChanged?.Invoke();
         }
 
         private void UpdateStaticProbesVisibility(bool obj)
@@ -664,25 +663,10 @@ namespace ElectricFieldVis.View
         }
 
 
-
-        FieldVisualizationLegend? _legend;
-        private void DrawBitmapLegend(Graphics g)
-        {
-            if (_legend == null)
-            {
-                _legend = new FieldVisualizationLegend(fcm);
-            }
-            Rectangle legendBounds = new Rectangle(
-            20,  // Adjust position as needed
-            20,                           // Top margin
-            80,                           // Width including labels
-            250                           // Height including title
-        );
-            _legend.DrawLegend(g, legendBounds);
-        }
-
         private FieldColorMapper fcm = new FieldColorMapper(0, 1E+2,FieldColorMapper.ColorScale.Thermal);
         
+        public FieldColorMapper FCM { get { return fcm; } }
+
         Point[,]? _bitmap_points = null;
 
         Point[,] Bitmap_points

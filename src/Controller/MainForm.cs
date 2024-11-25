@@ -17,8 +17,10 @@ namespace ElectricFieldVis.Controller
         private float _lastUpdateTime = 0f;
         private int _fps = 30;
         private StatsForm _statsForm;
+        private LegendForm? _legendForm;
         private MenuStrip _menuStrip;
         public string _scenarioName = "";
+        
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -123,6 +125,7 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem customizer = new ToolStripMenuItem("Customize");
             ToolStripMenuItem help = new ToolStripMenuItem("Helper");
             ToolStripMenuItem scenario = new ToolStripMenuItem("Scenario");
+            ToolStripMenuItem legend = new ToolStripMenuItem("Legend");
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
@@ -137,6 +140,7 @@ namespace ElectricFieldVis.Controller
             // main menu
             stats.Click += Click_stats;
             customizer.Click += Click_custom;
+            legend.Click += Click_legend;
 
             // help submenu
             center.Click += Click_center;
@@ -150,7 +154,22 @@ namespace ElectricFieldVis.Controller
             _menuStrip.Items.Add(customizer);
             _menuStrip.Items.Add(help);
             _menuStrip.Items.Add(scenario);
+            _menuStrip.Items.Add(legend);
             
+        }
+
+        private void Click_legend(object? sender, EventArgs e)
+        {
+            if (_legendForm == null || _legendForm.IsDisposed)
+            {
+                _legendForm = new LegendForm(_renderer);
+
+                _legendForm.StartPosition = FormStartPosition.CenterParent;
+                _legendForm.Show();
+            }
+
+            _legendForm.Activate();
+            _legendForm.Focus();
         }
 
         private void Click_load(object? sender, EventArgs e)
