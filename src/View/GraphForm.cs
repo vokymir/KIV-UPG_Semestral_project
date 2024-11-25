@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ElectricFieldVis.Model;
+using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.WinForms;
 
@@ -20,8 +21,6 @@ namespace ElectricFieldVis.View
         private DataStreamer _streamer;
 
         // TODO:
-        // Axes labels
-        // Y axis when big than small be adaptive
         // X axe what is there? tiks, so make it seconds
         public GraphForm(Probe probe, Renderer rnd)
         {
@@ -34,6 +33,14 @@ namespace ElectricFieldVis.View
             formsPlot1.Dock = DockStyle.Fill;
             
             _streamer = formsPlot1.Plot.Add.DataStreamer(60);
+
+            formsPlot1.Plot.XLabel("Time (s)");
+            formsPlot1.Plot.YLabel("Electric Field Intensity (N·C)");
+
+            //formsPlot1.Plot.Axes.Bottom.SetTicks((value) => value * 2, (value) => $"{value * 2}");
+
+
+            formsPlot1.Plot.Axes.ContinuouslyAutoscale = true;
             _streamer.ViewScrollLeft();
 
             formsPlot1.KeyDown += OnKeyDown;
