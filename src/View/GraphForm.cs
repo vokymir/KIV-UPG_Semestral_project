@@ -41,6 +41,7 @@ namespace ElectricFieldVis.View
 
             formsPlot1.KeyDown += OnKeyDown;
 
+            _streamer.Add(0);
             UpdateGraph();
             Show();
         }
