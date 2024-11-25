@@ -28,6 +28,14 @@ namespace ElectricFieldVis.View
         private Size _curr_client_size = new Size(800, 600);
         public Probe? _secondProbe = null;
         private int _bitmap_chunk_size = 4;
+        public FieldColorMapper.ColorScale CS
+        {
+            get { return fcm.Color_scale; }
+            set
+            {
+                fcm.Color_scale = value;
+            }
+        }
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -421,7 +429,7 @@ namespace ElectricFieldVis.View
         {
             if (_customizerForm == null || _customizerForm.IsDisposed)
             {
-                _customizerForm = new CustomizerForm(_mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth, where);
+                _customizerForm = new CustomizerForm(_mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth, where, fcm.Color_scale);
 
                 // Subscribe to the ColorChanged event
                 _customizerForm.ProbeColorChanged += UpdateProbeColor;
@@ -431,11 +439,17 @@ namespace ElectricFieldVis.View
                 _customizerForm.ZoomLevelChanged += UpdateZoomLevel;
                 _customizerForm.ShowGridChanged += UpdateGridVisibility;
                 _customizerForm.ShowStaticProbesChanged += UpdateStaticProbesVisibility;
+                _customizerForm.ColorScaleChanged += UpdateColorScale;
 
                 _customizerForm.Show();
             }
             _customizerForm.Activate();
             _customizerForm.Focus();
+        }
+
+        private void UpdateColorScale(FieldColorMapper.ColorScale scale)
+        {
+            fcm.Color_scale = scale;
         }
 
         private void UpdateStaticProbesVisibility(bool obj)

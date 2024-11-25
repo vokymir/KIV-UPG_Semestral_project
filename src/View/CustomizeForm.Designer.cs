@@ -40,6 +40,7 @@
             ZoomFactorLabel = new Label();
             showGrid = new CheckBox();
             showStaticProbes = new CheckBox();
+            HeatmapGroup = new GroupBox();
             SuspendLayout();
             // 
             // ProbeColor
@@ -166,11 +167,21 @@
             showStaticProbes.UseVisualStyleBackColor = true;
             showStaticProbes.CheckedChanged += showStaticProbes_CheckedChanged;
             // 
+            // HeatmapGroup
+            // 
+            HeatmapGroup.Location = new Point(19, 297);
+            HeatmapGroup.Name = "HeatmapGroup";
+            HeatmapGroup.Size = new Size(250, 168);
+            HeatmapGroup.TabIndex = 13;
+            HeatmapGroup.TabStop = false;
+            HeatmapGroup.Text = "Heatmap";
+            // 
             // CustomizerForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(914, 600);
+            Controls.Add(HeatmapGroup);
             Controls.Add(showStaticProbes);
             Controls.Add(showGrid);
             Controls.Add(ZoomFactorLabel);
@@ -203,5 +214,6 @@
         private Label ZoomFactorLabel;
         private CheckBox showGrid;
         private CheckBox showStaticProbes;
+        private GroupBox HeatmapGroup;
     }
 }
