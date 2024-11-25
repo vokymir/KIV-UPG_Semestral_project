@@ -23,4 +23,13 @@
     <PackageReference Include="Scottplot.WinForms" Version="5.0.47" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Images\kohout.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\kohout.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
