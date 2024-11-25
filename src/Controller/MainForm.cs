@@ -20,6 +20,7 @@ namespace ElectricFieldVis.Controller
         private LegendForm? _legendForm;
         private MenuStrip _menuStrip;
         public string _scenarioName = "";
+        private float _timeflow_speed = 1.0f;
         
 
         /// <summary>
@@ -126,6 +127,7 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem help = new ToolStripMenuItem("Helper");
             ToolStripMenuItem scenario = new ToolStripMenuItem("Scenario");
             ToolStripMenuItem legend = new ToolStripMenuItem("Legend");
+            ToolStripMenuItem time = new ToolStripMenuItem("Time");
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
@@ -136,6 +138,13 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem load = new ToolStripMenuItem("Load");
             ToolStripMenuItem save = new ToolStripMenuItem("Save");
             scenario.DropDownItems.AddRange([load, save]);
+
+            // TIME-submenu
+            ToolStripMenuItem slowerTime = new ToolStripMenuItem("Slower");
+            ToolStripMenuItem resetTime = new ToolStripMenuItem("Reset");
+            ToolStripMenuItem fasterTime = new ToolStripMenuItem("Faster");
+            ToolStripMenuItem customTime = new ToolStripMenuItem("Custom");
+            time.DropDownItems.AddRange([slowerTime, resetTime, fasterTime, customTime]);
 
             // main menu
             stats.Click += Click_stats;
@@ -150,12 +159,45 @@ namespace ElectricFieldVis.Controller
             load.Click += Click_load;
             save.Click += Click_save;
 
+            // time submenu
+            slowerTime.Click += Click_slowerTime;
+            resetTime.Click += Click_resetTime;
+            fasterTime.Click += Click_fasterTime;
+            customTime.Click += Click_customTime;
+
+            // add visualy to menu
             _menuStrip.Items.Add(stats);
             _menuStrip.Items.Add(customizer);
             _menuStrip.Items.Add(help);
             _menuStrip.Items.Add(scenario);
             _menuStrip.Items.Add(legend);
+            _menuStrip.Items.Add(time);
             
+        }
+
+        private void Click_customTime(object? sender, EventArgs e)
+        {
+            Point pt = new Point(this.Location.X, this.Location.Y);
+            string input = InputBox.Show("Desired Timeflow Speed", pt);
+            if (input != "")
+            {
+                SetTimeflowSpeed(input);
+            }
+        }
+
+        private void Click_fasterTime(object? sender, EventArgs e)
+        {
+            SetTimeflowSpeed(2.0f);
+        }
+
+        private void Click_resetTime(object? sender, EventArgs e)
+        {
+            SetTimeflowSpeed(0.0f);
+        }
+
+        private void Click_slowerTime(object? sender, EventArgs e)
+        {
+            SetTimeflowSpeed(0.5f);
         }
 
         private void Click_legend(object? sender, EventArgs e)
@@ -276,7 +318,7 @@ namespace ElectricFieldVis.Controller
         private void OnTimerTick(object? sender, EventArgs e)
         {
             float currentTime = Environment.TickCount / 1000f; // time in seconds
-            float deltaTime = currentTime - _lastUpdateTime;
+            float deltaTime = (currentTime - _lastUpdateTime) * _timeflow_speed;
             _lastUpdateTime = currentTime;
 
             _timeElapsed += deltaTime;
@@ -313,6 +355,57 @@ namespace ElectricFieldVis.Controller
             
             _renderer.Render(e.Graphics,this.ClientSize);
             
+        }
+
+        private float _timeflow_speed_LOWER_BOUND = 0.1f;
+        private float _timeflow_speed_UPPER_BOUND = 10f;
+        // multiply speed by multiplier
+        // 0.0 means reset to 1
+        private void SetTimeflowSpeed(float multiplier)
+        {
+            if (multiplier == 0.0f)
+            {
+                _timeflow_speed = 1f;
+                return;
+            }
+
+            float val = _timeflow_speed * multiplier;
+            SetTimeflowSpeed(val, true);
+        }
+
+        // custom
+        private void SetTimeflowSpeed(string str)
+        {
+            if (str == "")
+            {
+                return;
+            }
+
+            bool parseRes = false;
+            int num;
+            float num2;
+            parseRes = int.TryParse(str, out num);
+            if (parseRes)
+            {
+                SetTimeflowSpeed((float)num, true);
+                return;
+            }
+            parseRes = float.TryParse(str, out num2);
+            if (parseRes)
+            {
+                SetTimeflowSpeed(num2, true);
+                return;
+            }
+        }
+
+        // I am sorry
+        private void SetTimeflowSpeed(float value, bool I_WANT_TO_SET_THIS_VALUE_not_multiply)
+        {
+            if (value <= _timeflow_speed_UPPER_BOUND
+                && value >= _timeflow_speed_LOWER_BOUND)
+            {
+                _timeflow_speed = value;
+            }
         }
 
         #endregion time
