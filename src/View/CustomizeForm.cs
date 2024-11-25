@@ -46,7 +46,7 @@ namespace ElectricFieldVis.View
             showGrid.Checked = true;
             showStaticProbes.Checked = true;
 
-            this.Size = new Size(300, 300);
+            this.Size = new Size(300, 600);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = startLoc;
 

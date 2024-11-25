@@ -450,6 +450,7 @@ namespace ElectricFieldVis.View
         private void UpdateColorScale(FieldColorMapper.ColorScale scale)
         {
             fcm.Color_scale = scale;
+            _legend = new FieldVisualizationLegend(fcm);
         }
 
         private void UpdateStaticProbesVisibility(bool obj)
@@ -611,130 +612,6 @@ namespace ElectricFieldVis.View
 
         #region Bitmap
 
-        /*private void DrawBitmap(Graphics g)
-        {
-            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
-
-            int width = Bitmap_points.GetLength(0);
-            int height = Bitmap_points.GetLength(1);
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    Color clr = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
-                    Brush brush = new SolidBrush(clr);
-                    Point pt = Bitmap_points[x, y];
-                    g.FillRectangle(brush, pt.X, pt.Y, _bitmap_chunk_size, _bitmap_chunk_size);
-                }
-            }
-        }*/
-
-        /*private void DrawBitmap(Graphics g)
-        {
-            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
-
-            int finalWidth = this._curr_client_size.Width;
-            int finalHeight = this._curr_client_size.Height;
-            float size = (float)_bitmap_chunk_size;
-
-            using (Bitmap bmp = new Bitmap(finalWidth, finalHeight))
-            using (Graphics bmpG = Graphics.FromImage(bmp))
-            {
-                bmpG.SmoothingMode = SmoothingMode.AntiAlias;
-
-                for (int x = 0; x < Bitmap_points.GetLength(0); x++)
-                {
-                    for (int y = 0; y < Bitmap_points.GetLength(1); y++)
-                    {
-                        Color centerColor = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
-                        Color transparentColor = Color.FromArgb(0, centerColor);
-                        Point pt = Bitmap_points[x, y];
-
-                        using (var gradient = new PathGradientBrush(new PointF[] {
-                            new PointF(pt.X - size/2, pt.Y - size/2),
-                            new PointF(pt.X + size/2, pt.Y - size/2),
-                            new PointF(pt.X + size/2, pt.Y + size/2),
-                            new PointF(pt.X - size/2, pt.Y + size/2)
-                            }))
-                        {
-                            gradient.CenterColor = centerColor;
-                            //gradient.SurroundColors = new Color[] { transparentColor };
-                            gradient.FocusScales = new PointF(1f, 1f);
-                            bmpG.FillRectangle(gradient,
-                            pt.X - size / 2,
-                            pt.Y - size / 2,
-                                size,
-                                size);
-                        }
-                    }
-                }
-
-                g.DrawImage(bmp, 0, 0);
-            }
-        }*/
-
-        /*private void DrawBitmap(Graphics g)
-        {
-            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
-
-            // Create a bitmap at a higher resolution than the grid
-            int scaleFactor = 2; // Increase this for smoother output
-            int finalWidth = this._curr_client_size.Width;
-            int finalHeight = this._curr_client_size.Height;
-
-            using (Bitmap bmp = new Bitmap(finalWidth, finalHeight))
-            using (Graphics bmpG = Graphics.FromImage(bmp))
-            {
-                // Enable anti-aliasing
-                bmpG.SmoothingMode = SmoothingMode.AntiAlias;
-                bmpG.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-                // Option 1: Draw smooth circles instead of rectangles
-                for (int x = 0; x < Bitmap_points.GetLength(0); x++)
-                {
-                    for (int y = 0; y < Bitmap_points.GetLength(1); y++)
-                    {
-                        Color clr = ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
-                        using (Brush brush = new SolidBrush(Color.FromArgb(200, clr))) // Add some transparency
-                        {
-                            Point pt = Bitmap_points[x, y];
-                            float size = _bitmap_chunk_size * 1.2f; // Slightly larger than chunk size for overlap
-                            bmpG.FillRectangle(brush,
-                                pt.X - size / 2,
-                                pt.Y - size / 2,
-                                size,
-                                size);
-                        }
-                    }
-                }
-
-                // Draw the final bitmap to the graphics object
-                g.DrawImage(bmp, 0, 0);
-            }
-        }
-        */
-
-        /*
-        private void DrawBitmap(Graphics g)
-        {
-            _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
-
-            int width = Bitmap_points.GetLength(0);
-            int height = Bitmap_points.GetLength(1);
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    Color clr = fcm.ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
-                    Brush brush = new SolidBrush(clr);
-                    Point pt = Bitmap_points[x, y];
-                    g.FillRectangle(brush, pt.X -_bitmap_chunk_size / 2, pt.Y - _bitmap_chunk_size / 2, _bitmap_chunk_size, _bitmap_chunk_size);
-                }
-            }
-        }*/
-
         private void DrawBitmap(Graphics g)
         {
             int width = Bitmap_points.GetLength(0);
@@ -788,12 +665,23 @@ namespace ElectricFieldVis.View
 
 
 
+        FieldVisualizationLegend? _legend;
         private void DrawBitmapLegend(Graphics g)
         {
-            // TODO
+            if (_legend == null)
+            {
+                _legend = new FieldVisualizationLegend(fcm);
+            }
+            Rectangle legendBounds = new Rectangle(
+            20,  // Adjust position as needed
+            20,                           // Top margin
+            80,                           // Width including labels
+            250                           // Height including title
+        );
+            _legend.DrawLegend(g, legendBounds);
         }
 
-        private FieldColorMapper fcm = new FieldColorMapper(-1E+2, 1E+2,FieldColorMapper.ColorScale.Thermal);
+        private FieldColorMapper fcm = new FieldColorMapper(0, 1E+2,FieldColorMapper.ColorScale.Thermal);
         
         Point[,]? _bitmap_points = null;
 

@@ -9,7 +9,9 @@ namespace ElectricFieldVis.View
     public class FieldColorMapper
     {
         private readonly double _minIntensity;
+        public double MinIntensity {  get { return _minIntensity; } }
         private readonly double _maxIntensity;
+        public double MaxIntensity {  get { return _maxIntensity; } }
         private ColorScale _colorScale;
         public ColorScale Color_scale
         {
