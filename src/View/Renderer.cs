@@ -27,7 +27,7 @@ namespace ElectricFieldVis.View
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
         public Probe? _secondProbe = null;
-        private int _bitmap_chunk_size = 20;
+        private int _bitmap_chunk_size = 4;
 
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
@@ -701,6 +701,7 @@ namespace ElectricFieldVis.View
         }
         */
 
+        /*
         private void DrawBitmap(Graphics g)
         {
             _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
@@ -718,7 +719,60 @@ namespace ElectricFieldVis.View
                     g.FillRectangle(brush, pt.X -_bitmap_chunk_size / 2, pt.Y - _bitmap_chunk_size / 2, _bitmap_chunk_size, _bitmap_chunk_size);
                 }
             }
+        }*/
+
+        private void DrawBitmap(Graphics g)
+        {
+            int width = Bitmap_points.GetLength(0);
+            int height = Bitmap_points.GetLength(1);
+
+            int canvas_w = this._curr_client_size.Width;
+            int canvas_h = this._curr_client_size.Height;
+
+            // Create a new bitmap with the appropriate dimensions
+            Bitmap bitmap = new Bitmap(canvas_w, canvas_h, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            // Lock the bitmap's bits for unsafe access
+            System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(
+                new Rectangle(0, 0, canvas_w, canvas_h),
+                System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            unsafe
+            {
+                byte* ptr = (byte*)bmpData.Scan0;
+                _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        // Calculate the color for the current point
+                        Color clr = fcm.ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
+
+                        // Compute the pixel's position in the byte array
+                        int offset = (x * bmpData.Stride) + (y * 4);
+
+                        // Set pixel values (BGRA format)
+                        ptr[offset] = clr.B;     // Blue
+                        ptr[offset + 1] = clr.G; // Green
+                        ptr[offset + 2] = clr.R; // Red
+                        ptr[offset + 3] = clr.A; // Alpha
+                    }
+                }
+            }
+
+            // Unlock the bits
+            bitmap.UnlockBits(bmpData);
+
+            // Draw the generated bitmap on the graphics context
+            g.DrawImage(bitmap, new Rectangle(0, 0, bitmap.Width * _bitmap_chunk_size, bitmap.Height * _bitmap_chunk_size));
+
+            // Dispose the bitmap to free resources
+            bitmap.Dispose();
         }
+
+
 
         private void DrawBitmapLegend(Graphics g)
         {
@@ -790,28 +844,6 @@ namespace ElectricFieldVis.View
             return res;
         }
 
-        Particle? GetNearestParticle(Vector2 realLifeCoords)
-        {
-            Particle res = null;
-            double distance = double.MaxValue;
-            foreach (var particle in _particles)
-            {
-                double curr_dist = Math.Sqrt(
-                    Math.Pow(realLifeCoords.X - particle.X, 2) +
-                    Math.Pow(realLifeCoords.Y - particle.Y, 2)
-                );
-
-                if (curr_dist < distance)
-                {
-                    distance = curr_dist;
-                    res = particle;
-                }
-            }
-
-            
-
-            return res;
-        }
     
         #endregion Bitmap
     }

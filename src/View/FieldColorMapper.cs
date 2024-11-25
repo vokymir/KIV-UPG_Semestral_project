@@ -10,7 +10,15 @@ namespace ElectricFieldVis.View
     {
         private readonly double _minIntensity;
         private readonly double _maxIntensity;
-        private readonly ColorScale _colorScale;
+        private ColorScale _colorScale;
+        public ColorScale Color_scale
+        {
+            get { return _colorScale; }
+            set
+            {
+                _colorScale = value;
+            }
+        }
 
         public enum ColorScale
         {
