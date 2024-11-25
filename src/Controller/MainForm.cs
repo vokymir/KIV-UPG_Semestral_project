@@ -267,6 +267,11 @@ namespace ElectricFieldVis.Controller
             drawingPanel.Invalidate();
             
             UpdateStatsForm();
+
+            if (_secondProbeGraph != null)
+            {
+                _secondProbeGraph.UpdateGraph();
+            }
         }
 
         private void UpdateParticleValues(float timeElapsed)
@@ -369,6 +374,7 @@ namespace ElectricFieldVis.Controller
             this._renderer._particles.Add(new_particle);
         }
 
+        private GraphForm? _secondProbeGraph;
         private void CreateStaticProbe(MouseEventArgs e)
         {
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
@@ -377,6 +383,11 @@ namespace ElectricFieldVis.Controller
 
             _renderer._secondProbe = probe;
 
+            if (_secondProbeGraph != null)
+            {
+                _secondProbeGraph.Dispose();
+            }
+            _secondProbeGraph = new GraphForm(probe, _renderer);
         }
 
         private void MainForm_MouseUp(object? sender, MouseEventArgs e)
