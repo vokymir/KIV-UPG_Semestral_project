@@ -32,7 +32,7 @@ namespace ElectricFieldVis.View
             formsPlot1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             formsPlot1.Dock = DockStyle.Fill;
             
-            _streamer = formsPlot1.Plot.Add.DataStreamer(60);
+            _streamer = formsPlot1.Plot.Add.DataStreamer(100, 0.1);
 
             formsPlot1.Plot.XLabel("Time (s)");
             formsPlot1.Plot.YLabel("Electric Field Intensity (N·C)");

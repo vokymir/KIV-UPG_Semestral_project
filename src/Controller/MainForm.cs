@@ -287,7 +287,8 @@ namespace ElectricFieldVis.Controller
             
             UpdateStatsForm();
 
-            if (_secondProbeGraph != null)
+            int second_divisor = 10;
+            if (_secondProbeGraph != null && Math.Floor(currentTime * second_divisor) - Math.Floor(second_divisor * (currentTime - deltaTime)) >= 1)
             {
                 _secondProbeGraph.UpdateGraph();
             }
