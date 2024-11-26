@@ -26,7 +26,7 @@ namespace ElectricFieldVis.View
         private Color _particlePositiveColor = Color.Red;
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
-        public Probe? _secondProbe = null;
+        public HashSet<(Probe, GraphForm)> _otherProbes = new HashSet<(Probe, GraphForm)> { };
         private int _bitmap_chunk_size = 4;
         private Image _particle_image;
         public FieldColorMapper.ColorScale CS
@@ -278,9 +278,9 @@ namespace ElectricFieldVis.View
                 DrawParticle(g, particle);
             }
 
-            if (_secondProbe != null)
+            foreach ((Probe, GraphForm) probeTwin in _otherProbes)
             {
-                DrawProbe(g, _secondProbe);
+                DrawProbe(g, probeTwin.Item1);
             }
 
             DrawProbe(g, _mainProbe);
@@ -407,6 +407,10 @@ namespace ElectricFieldVis.View
             {
                 Pen pen = new Pen(brush, _scale * 0.05f);
                 pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
+                if (probe != _mainProbe)
+                {
+                    pen.StartCap = LineCap.RoundAnchor;
+                }
                 g.DrawLine(pen, new PointF(probeCoords), new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
             }
         }

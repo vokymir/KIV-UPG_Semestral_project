@@ -331,9 +331,12 @@ namespace ElectricFieldVis.Controller
 
             // miliseconds are the best, dont change it unless change graph X ax label in GraphForm.cs
             int second_divisor = 10;
-            if (_secondProbeGraph != null && Math.Floor(currentTime * second_divisor) - Math.Floor(second_divisor * (currentTime - deltaTime)) >= 1)
+            if (Math.Floor(currentTime * second_divisor) - Math.Floor(second_divisor * (currentTime - deltaTime)) >= 1)
             {
-                _secondProbeGraph.UpdateGraph();
+                foreach( (Probe, GraphForm) probeGraph in _renderer._otherProbes)
+                {
+                    probeGraph.Item2.UpdateGraph();
+                }
             }
         }
 
@@ -488,20 +491,19 @@ namespace ElectricFieldVis.Controller
             this._renderer._particles.Add(new_particle);
         }
 
-        private GraphForm? _secondProbeGraph;
         private void CreateStaticProbe(MouseEventArgs e)
         {
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
 
+            int h = ;
+            int s = ;
+            int v = (_renderer._otherProbes.Count * 37) % 256;
+            
+
             Probe probe = new Probe(click, 0, Color.Aqua);
+            GraphForm graph = new GraphForm(probe, _renderer);
 
-            _renderer._secondProbe = probe;
-
-            if (_secondProbeGraph != null)
-            {
-                _secondProbeGraph.Dispose();
-            }
-            _secondProbeGraph = new GraphForm(probe, _renderer);
+            _renderer._otherProbes.Add((probe, graph));          
         }
 
         private void MainForm_MouseUp(object? sender, MouseEventArgs e)
