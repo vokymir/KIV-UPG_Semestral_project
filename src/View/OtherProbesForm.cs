@@ -42,7 +42,7 @@ namespace ElectricFieldVis.View
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            _form._opf = null;
+            _form.opf = null;
             base.OnClosing(e);
         }
 

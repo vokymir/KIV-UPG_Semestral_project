@@ -19,7 +19,6 @@ namespace ElectricFieldVis.Controller
         private StatsForm _statsForm;
         private LegendForm? _legendForm;
         private MenuStrip _menuStrip;
-        private OtherProbesForm? _opf;
         private Particle? _moving_particle = null;
         private Probe _probe;
         private Probe? _moving_probe = null;
@@ -33,6 +32,7 @@ namespace ElectricFieldVis.Controller
         private float _timeflow_speed = 1.0f;
         private int _fps = 30;
         private bool[] static_probe_ids = new bool[360];
+        public OtherProbesForm? opf;
         public string _scenarioName = "";
 
         public event Action OtherProbesChanged;
@@ -182,14 +182,14 @@ namespace ElectricFieldVis.Controller
 
         private void Click_other_probes(object? sender, EventArgs e)
         {
-            if (_opf != null)
+            if (opf != null)
             {
-                _opf.Focus();
-                _opf.Activate();
+                opf.Focus();
+                opf.Activate();
                 return;
             }
-            _opf = new OtherProbesForm(this, _renderer);
-            _opf.Show();
+            opf = new OtherProbesForm(this, _renderer);
+            opf.Show();
             OtherProbesChanged?.Invoke();
         }
 
