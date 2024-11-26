@@ -150,8 +150,8 @@ namespace ElectricFieldVis.View
 
             _curr_client_size = clientSize;
 
-            _particle_image = new GifAnimation("Images/gif.gif", "Images/kohout.png");
-            _probe_image = new GifAnimation("Images/lightsaber.gif", "Images/kohout.png");
+            _particle_image = new GifAnimation("Images/kohout.png", "Images/kohout.png");
+            _probe_image = new GifAnimation("Images/lightsaber1.gif", "Images/kohout.png");
 
             InitWindow(clientSize);
         }
@@ -403,7 +403,7 @@ namespace ElectricFieldVis.View
 
             // find the current energy of the Probe (arrow)
             float energy = FieldCalculator.CalculateFieldIntensity(direction);
-
+            
             // dynamic arrow length
             if (energy > 0)
             {
@@ -414,12 +414,15 @@ namespace ElectricFieldVis.View
                 float arrowLength = energy / divisor;
 
                 arrowLength = Math.Clamp(arrowLength, minArrowLength, maxArrowLength);
+                if ((probe == mainProbe && funMode))
+                {
+                    arrowLength = minArrowLength;
+                }
 
                 direction.X = (direction.X / energy) * arrowLength;
                 direction.Y = (direction.Y / energy) * arrowLength * -1;
-
             }
-
+            
             #endregion math
 
             #region text
