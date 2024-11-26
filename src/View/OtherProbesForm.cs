@@ -48,7 +48,7 @@ namespace ElectricFieldVis.View
 
         private void RenderButtons()
         {
-            // Clear existing buttons if dynamically added
+            // clear dynamically added buttons
             foreach (var control in Controls.OfType<Button>().ToList())
             {
                 if (control.Text.Contains("Probe"))
@@ -58,22 +58,22 @@ namespace ElectricFieldVis.View
                 }
             }
 
-            int buttonX = 10; // Starting position for buttons
+            int buttonX = 10; // starting position for buttons
             int buttonY = 10;
 
             foreach ((Probe probe, GraphForm graphForm) in _rnd.otherProbes)
             {
-                // Create a new button for each probe
+                // create a new button for each probe
                 Button probeButton = new Button
                 {
                     Text = $"Probe {probe.ID}",
                     ForeColor = probe.color,
-                    Tag = (probe, graphForm),  // Store the probe and its GraphForm
+                    Tag = (probe, graphForm),  // store the probe and graph
                     Location = new Point(buttonX, buttonY),
                     Size = new Size(130, 30)
                 };
 
-                // Attach click event
+                // attach click event
                 probeButton.Click += (sender, args) =>
                 {
                     var (p, gf) = ((Probe, GraphForm))((Button)sender).Tag;
@@ -88,15 +88,15 @@ namespace ElectricFieldVis.View
                     }
                     else
                     {
-                        // Focus the existing graph form
+                        // focus on the existing graph
                         gf.Focus();
                     }
                 };
 
-                // Add button to the form
+                // Add button visually
                 Controls.Add(probeButton);
 
-                // Adjust Y position for the next button
+                // Update Y position for the next button
                 buttonY += 40;
             }
         }

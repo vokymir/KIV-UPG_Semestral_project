@@ -27,11 +27,7 @@ namespace ElectricFieldVis.View
             InitializeComponent();
 
             _renderer = rnd;
-
-            // Subscribe to the ColorScaleChanged event
             _renderer.ColorScaleChanged += () => panel1.Invalidate();
-
-            // Attach the Paint event to the panel
             panel1.Paint += Panel1_Paint;
 
             // close on Ctrl+W
