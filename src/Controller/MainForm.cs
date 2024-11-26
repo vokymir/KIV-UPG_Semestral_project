@@ -128,6 +128,7 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem scenario = new ToolStripMenuItem("Scenario");
             ToolStripMenuItem legend = new ToolStripMenuItem("Legend");
             ToolStripMenuItem time = new ToolStripMenuItem("Time");
+            ToolStripMenuItem other_probes = new ToolStripMenuItem("Static probes");
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
@@ -150,6 +151,7 @@ namespace ElectricFieldVis.Controller
             stats.Click += Click_stats;
             customizer.Click += Click_custom;
             legend.Click += Click_legend;
+            other_probes.Click += Click_other_probes;
 
             // help submenu
             center.Click += Click_center;
@@ -172,7 +174,23 @@ namespace ElectricFieldVis.Controller
             _menuStrip.Items.Add(scenario);
             _menuStrip.Items.Add(legend);
             _menuStrip.Items.Add(time);
+            _menuStrip.Items.Add(other_probes);
             
+        }
+
+        public event Action OtherProbesChanged;
+        public OtherProbesForm? _opf;
+        private void Click_other_probes(object? sender, EventArgs e)
+        {
+            if (_opf != null)
+            {
+                _opf.Focus();
+                _opf.Activate();
+                return;
+            }
+            _opf = new OtherProbesForm(this, _renderer);
+            _opf.Show();
+            OtherProbesChanged?.Invoke();
         }
 
         private void Click_customTime(object? sender, EventArgs e)
@@ -512,7 +530,8 @@ namespace ElectricFieldVis.Controller
             Probe probe = new Probe(click, 0, clr);
             GraphForm graph = new GraphForm(probe, _renderer);
 
-            _renderer._otherProbes.Add((probe, graph));          
+            _renderer._otherProbes.Add((probe, graph));
+            OtherProbesChanged?.Invoke();
         }
 
         public Color ColorFromHSV(double hue, double saturation, double value)
