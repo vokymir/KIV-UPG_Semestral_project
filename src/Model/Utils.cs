@@ -34,7 +34,6 @@ namespace ElectricFieldVis.Model
             }
         }
 
-
         public static Color ColorFromHSV(double hue, double saturation, double value)
         {
             int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
@@ -59,6 +58,5 @@ namespace ElectricFieldVis.Model
             else
                 return Color.FromArgb(255, v, p, q);
         }
-
     }
 }
