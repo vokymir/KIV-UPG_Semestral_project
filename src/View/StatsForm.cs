@@ -16,7 +16,7 @@ namespace ElectricFieldVis.View
     {
         
         /// <summary>
-        /// Form with statistics.
+        /// Form with DEV statistics.
         /// </summary>
         public StatsForm()
         {
@@ -30,7 +30,6 @@ namespace ElectricFieldVis.View
             this.KeyDown += new KeyEventHandler(StatsForm_KeyDown);
         }
 
-        
         private void StatsForm_KeyDown(object? sender, KeyEventArgs e)
         {
             Utils.HandleCtrlW(this, e);

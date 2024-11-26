@@ -33,7 +33,8 @@ namespace ElectricFieldVis.View
         private float[,]? _bmp_pts_intensity = null;
         private Point[,]? _bitmap_points = null;
         private int _bitmap_chunk_size = 4;
-        private Image _particle_image;
+        private GifAnimation _particle_image;
+        private GifAnimation _probe_image;
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
         private float _scale = 1f;
@@ -149,8 +150,8 @@ namespace ElectricFieldVis.View
 
             _curr_client_size = clientSize;
 
-            // for FunMode
-            _particle_image = Image.FromFile("Images/kohout.png");
+            _particle_image = new GifAnimation("Images/gif.gif", "Images/kohout.png");
+            _probe_image = new GifAnimation("Images/lightsaber.gif", "Images/kohout.png");
 
             InitWindow(clientSize);
         }
@@ -344,7 +345,9 @@ namespace ElectricFieldVis.View
             {
                 if (funMode)
                 {
-                    g.DrawImage(_particle_image, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
+                    Point pt = new Point((int)(particleCoords.X - radius), (int)(particleCoords.Y - radius));
+                    _particle_image.DrawAtPosition(g, pt, (int)(2 * radius), (int)(2 * radius));
+                    //g.DrawImage(_particle_image, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
                 }
                 else
                 {
@@ -454,7 +457,17 @@ namespace ElectricFieldVis.View
                 { // for other probes than main
                     pen.StartCap = LineCap.RoundAnchor;
                 }
-                g.DrawLine(pen, new PointF(probeCoords), new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
+                if(probe == mainProbe && funMode)
+                {
+                    Point from = new Point((int)probeCoords.X, (int)probeCoords.Y);
+                    Point to = new Point((int)(probeCoords.X + direction.X), (int)(probeCoords.Y + direction.Y));
+                    
+                    _probe_image.DrawTransformed(g, from, to);
+                }
+                else
+                {
+                    g.DrawLine(pen, new PointF(probeCoords), new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
+                }
             }
 
             #endregion arrow
