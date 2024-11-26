@@ -23,6 +23,7 @@ namespace ElectricFieldVis.View
         public event Action<bool> ShowStaticProbesChanged;
         public event Action<FieldColorMapper.ColorScale> ColorScaleChanged;
 
+        // variables
         private Color _probeColor;
         private Color _particlePositiveColor = Color.Red;
         private Color _particleNegativeColor = Color.Blue;
@@ -63,13 +64,13 @@ namespace ElectricFieldVis.View
 
         private void CreateColorScaleRadioButtons()
         {
-            // Create a GroupBox to contain the radio buttons
+            // map to a Groupbox containing radio buttons
             GroupBox colorScaleGroupBox = HeatmapGroup;
 
-            // Get all values from the FieldColorMapper.ColorScale enum
+            // get all values from enum FieldColorMapper.ColorScale
             var colorScaleValues = Enum.GetValues(typeof(FieldColorMapper.ColorScale));
 
-            int yOffset = 20; // Vertical spacing for radio buttons
+            int yOffset = 20; // vertical spacing for radio buttons
 
             foreach (FieldColorMapper.ColorScale scale in colorScaleValues)
             {
@@ -78,16 +79,16 @@ namespace ElectricFieldVis.View
                     Text = scale.ToString(),
                     Location = new Point(10, yOffset),
                     AutoSize = true,
-                    Tag = scale // Store the enum value in the Tag property for easy access
+                    Tag = scale // store the enum value in the Tag property for easy access
                 };
 
-                // Set the checked state based on the current selected color scale
+                // set the checked state based on the current selected color scale
                 if (scale == _colorScale)
                 {
                     rb.Checked = true;
                 }
 
-                // Add event handler to update _colorScale when the radio button is clicked
+                // add event handler to update _colorScale when the radio button is clicked
                 rb.CheckedChanged += (sender, e) =>
                 {
                     if (rb.Checked)
@@ -98,7 +99,7 @@ namespace ElectricFieldVis.View
                 };
 
                 colorScaleGroupBox.Controls.Add(rb);
-                yOffset += 25; // Adjust the Y offset for the next radio button
+                yOffset += 25; // change the Y offset for the next radio button
             }
         }
 
@@ -114,12 +115,10 @@ namespace ElectricFieldVis.View
             {
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Update the selected color and display it
+                    // update the selected color
                     _probeColor = colorDialog.Color;
 
                     set_btnColor(ProbeColor, _probeColor);
-
-                    // Raise the event to notify subscribers of the color change
                     ProbeColorChanged?.Invoke(_probeColor);
                 }
             }
@@ -141,12 +140,10 @@ namespace ElectricFieldVis.View
             {
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Update the selected color and display it
+                    // update the selected color
                     _particlePositiveColor = colorDialog.Color;
 
                     set_btnColor(ParticlePositiveColor, _particlePositiveColor);
-
-                    // Raise the event to notify subscribers of the color change
                     ParticlePositiveColorChanged?.Invoke(_particlePositiveColor);
                 }
             }
@@ -158,12 +155,10 @@ namespace ElectricFieldVis.View
             {
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Update the selected color and display it
+                    // update the selected color and display it
                     _particleNegativeColor = colorDialog.Color;
 
                     set_btnColor(ParticleNegativeColor, _particleNegativeColor);
-
-                    // Raise the event to notify subscribers of the color change
                     ParticleNegativeColorChanged?.Invoke(_particleNegativeColor);
                 }
             }
