@@ -455,7 +455,15 @@ namespace ElectricFieldVis.Controller
             {
                 // if not hit any particle
                 Particle? the_one = WasParticleClicked(e);
-                if ( the_one == null)
+                Probe? the_probe = WasProbeClicked(e);
+                if (the_one != null)
+                {
+                    HandleParticleOnClick(e, the_one);
+                }else if (the_probe != null)
+                {
+                    HandleProbeOnClick(e, the_probe);
+                }
+                else
                 {
                     if (Control.ModifierKeys == Keys.Control)
                     {
@@ -463,22 +471,9 @@ namespace ElectricFieldVis.Controller
                     }
                     else
                     {
-                        Probe? the_probe = WasProbeClicked(e);
-                        if (the_probe != null)
-                        {
-                            HandleProbeOnClick(e, the_probe);
-                        }
-                        else
-                        {
-                            CreateStaticProbe(e);
-                        }
+                        CreateStaticProbe(e);
                     }
                 }
-                else
-                {
-                    HandleParticleOnClick(e, the_one);
-                }
-                
             }
 
         }
@@ -641,6 +636,7 @@ namespace ElectricFieldVis.Controller
                 }
                 Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
                 _moving_probe.position = click;
+                OtherProbesChanged?.Invoke();
             }
         }
         private bool _zooming = false;
