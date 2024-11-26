@@ -21,6 +21,8 @@ namespace ElectricFieldVis.Controller
         private MenuStrip _menuStrip;
         public string _scenarioName = "";
         private float _timeflow_speed = 1.0f;
+        private bool _funMode = false;
+        public bool FunMode { get { return _funMode; } }
         
 
         /// <summary>
@@ -128,7 +130,9 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem scenario = new ToolStripMenuItem("Scenario");
             ToolStripMenuItem legend = new ToolStripMenuItem("Legend");
             ToolStripMenuItem time = new ToolStripMenuItem("Time");
-            ToolStripMenuItem other_probes = new ToolStripMenuItem("Static probes");
+            ToolStripMenuItem other_probes = new ToolStripMenuItem("Added probes");
+            ToolStripMenuItem funMode_toggle = new ToolStripMenuItem("Fun Mode OFF");
+            funMode_toggle.Name = "fun";
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
@@ -152,6 +156,7 @@ namespace ElectricFieldVis.Controller
             customizer.Click += Click_custom;
             legend.Click += Click_legend;
             other_probes.Click += Click_other_probes;
+            funMode_toggle.Click += Click_funMode;
 
             // help submenu
             center.Click += Click_center;
@@ -175,7 +180,17 @@ namespace ElectricFieldVis.Controller
             _menuStrip.Items.Add(legend);
             _menuStrip.Items.Add(time);
             _menuStrip.Items.Add(other_probes);
-            
+            _menuStrip.Items.Add(funMode_toggle);
+        }
+
+        //public event Action<bool> FunModeClicked;
+        private void Click_funMode(object? sender, EventArgs e)
+        {
+            _funMode = !_funMode;
+            //sender.Text = $"Fun Mode {(_funMode ? "ON" : "OFF")}";
+            this._menuStrip.Items.Find("fun", false)[0].Text = $"Fun Mode {(_funMode ? "ON" : "OFF")}";
+            //FunModeClicked?.Invoke(_funMode);
+            this._renderer.funMode = _funMode;
         }
 
         public event Action OtherProbesChanged;

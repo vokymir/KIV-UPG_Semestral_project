@@ -29,6 +29,7 @@ namespace ElectricFieldVis.View
         public HashSet<(Probe, GraphForm)> _otherProbes = new HashSet<(Probe, GraphForm)> { };
         private int _bitmap_chunk_size = 4;
         private Image _particle_image;
+        public bool funMode = false;
         public FieldColorMapper.ColorScale CS
         {
             get { return fcm.Color_scale; }
@@ -311,8 +312,14 @@ namespace ElectricFieldVis.View
             // draw the particle
             using (Brush brush = new SolidBrush(particleColor))
             {
-                //g.FillEllipse(brush, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
-                g.DrawImage(_particle_image, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
+                if (funMode)
+                {
+                    g.DrawImage(_particle_image, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
+                }
+                else
+                {
+                    g.FillEllipse(brush, particleCoords.X - radius, particleCoords.Y - radius, radius * 2, radius * 2);
+                }
             }
 
             // write a value next to (currently on the top) the particle

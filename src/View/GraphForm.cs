@@ -23,6 +23,10 @@ namespace ElectricFieldVis.View
 
         public GraphForm(Probe probe, Renderer rnd)
         {
+            Width = 600;
+            Height = 400;
+            MinimumSize = new Size(Width, Height);
+            StartPosition = FormStartPosition.CenterScreen;
             InitializeComponent();
 
             _probe = probe;
