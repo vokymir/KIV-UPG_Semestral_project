@@ -16,11 +16,10 @@ namespace ElectricFieldVis.Controller
     {
         public bool isDefault {  get; set; }
         public List<Particle>? particles { get; set; }
-        public Probe? secondProbe { get; set; }
         public Scenario() { }
 
         /// <summary>
-        /// Load the desired scenario, or default scenario 0 if there is any problem. Log the problem to Console.
+        /// Load the desired scenario, or default scenario 0 if there is any problem. Message the problem.
         /// </summary>
         /// <param name="scenarioName">Name of the desired scenario</param>
         /// <returns>Complete scenario.</returns>
@@ -106,7 +105,6 @@ namespace ElectricFieldVis.Controller
         internal static bool SaveScenario(Scenario s, string name)
         {
             string filePath = $"Scenarios/{name}.json";
-
 
             try
             {
