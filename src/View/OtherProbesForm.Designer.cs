@@ -35,8 +35,13 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
-            ClientSize = new Size(331, 450);
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new Size(182, 253);
+            MaximumSize = new Size(200, 600);
+            MinimumSize = new Size(200, 100);
             Name = "OtherProbesForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Static Probes";
             ResumeLayout(false);
         }

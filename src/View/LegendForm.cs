@@ -1,4 +1,5 @@
-﻿using ScottPlot.Panels;
+﻿using ElectricFieldVis.Model;
+using ScottPlot.Panels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,10 +37,7 @@ namespace ElectricFieldVis.View
             // close on Ctrl+W
             this.KeyDown += (s, e) =>
             {
-                if (e.KeyCode == Keys.Escape || e.Control && e.KeyCode == Keys.W)
-                {
-                    this.Close();
-                }
+                Utils.HandleCtrlW(this, e);
             };
         }
 

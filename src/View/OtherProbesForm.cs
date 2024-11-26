@@ -26,11 +26,15 @@ namespace ElectricFieldVis.View
                 RenderButtons();
             };
 
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+
             InitializeComponent();
 
             this.AutoScroll = true;
 
-            KeyDown += (s, e) =>
+            this.KeyDown += (s, e) =>
             {
                 Utils.HandleCtrlW(this, e);
             };
@@ -62,11 +66,11 @@ namespace ElectricFieldVis.View
                 // Create a new button for each probe
                 Button probeButton = new Button
                 {
-                    Text = $"Probe X:{probe.position.X}, Y:{probe.position.Y}",
+                    Text = $"Probe X:{probe.position.X:F1} Y:{probe.position.Y:F1}",
                     ForeColor = probe.color,
                     Tag = (probe, graphForm),  // Store the probe and its GraphForm
                     Location = new Point(buttonX, buttonY),
-                    Size = new Size(100, 30)
+                    Size = new Size(130, 30)
                 };
 
                 // Attach click event

@@ -442,6 +442,7 @@ namespace ElectricFieldVis.Controller
         private Vector2 _map_position_before = Vector2.Zero;
         private bool _moving_map = false;
         private Particle? _moving_particle = null;
+        private Probe? _moving_probe = null;
         
         private void MainForm_MouseDown(object? sender, MouseEventArgs e)
         {
@@ -462,7 +463,15 @@ namespace ElectricFieldVis.Controller
                     }
                     else
                     {
-                        CreateStaticProbe(e);
+                        Probe? the_probe = WasProbeClicked(e);
+                        if (the_probe != null)
+                        {
+                            HandleProbeOnClick(e, the_probe);
+                        }
+                        else
+                        {
+                            CreateStaticProbe(e);
+                        }
                     }
                 }
                 else
@@ -472,6 +481,43 @@ namespace ElectricFieldVis.Controller
                 
             }
 
+        }
+
+        private void HandleProbeOnClick(MouseEventArgs e, Probe the_probe)
+        {
+            if (Form.ModifierKeys == Keys.Control)
+            {
+                _renderer._otherProbes.RemoveWhere(x => x.Item1 == the_probe);
+                OtherProbesChanged?.Invoke();
+                return;
+            }
+
+            _moving_probe = the_probe;
+        }
+
+        private Probe? WasProbeClicked(MouseEventArgs e)
+        {
+            Probe? the_clicked_one = null;
+
+            Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+
+            foreach ((Probe, GraphForm) pg in _renderer._otherProbes)
+            {
+                Probe probe = pg.Item1 as Probe;
+                float probe_radius = 0.075f;
+
+                if (click.X <= probe.position.X + probe_radius &&
+                    click.X >= probe.position.X - probe_radius &&
+                    click.Y <= probe.position.Y + probe_radius &&
+                    click.Y >= probe.position.Y - probe_radius
+                    )
+                {
+                    the_clicked_one = probe;
+                    break;
+                }
+            }
+
+            return the_clicked_one;
         }
 
         private void CreateNewParticle(MouseEventArgs e)
@@ -563,7 +609,7 @@ namespace ElectricFieldVis.Controller
         {
             _moving_map = false;
             _moving_particle = null;
-            
+            _moving_probe = null;
         }
 
         private void MainForm_MouseMove(object? sender, MouseEventArgs e)
@@ -585,6 +631,16 @@ namespace ElectricFieldVis.Controller
                 Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
                 _moving_particle.X = click.X;
                 _moving_particle.Y = click.Y;
+            }
+            if (_moving_probe != null)
+            {
+                if (e.X <= this.drawingPanel.Left || e.Y <= this.drawingPanel.Top ||
+                    e.X >= this.drawingPanel.Right || e.Y >= this.drawingPanel.Bottom)
+                {
+                    return;
+                }
+                Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+                _moving_probe.position = click;
             }
         }
         private bool _zooming = false;
