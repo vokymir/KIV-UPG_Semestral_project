@@ -47,7 +47,7 @@ namespace ElectricFieldVis.View
             _streamer = formsPlot1.Plot.Add.DataStreamer(100, -0.1);
             
             formsPlot1.Plot.XLabel("Time (s)");
-            formsPlot1.Plot.YLabel("Electric Field Intensity (N·C)");
+            formsPlot1.Plot.YLabel("Intensity (N·C)");
             formsPlot1.Plot.Axes.ContinuouslyAutoscale = true;
             _streamer.ViewScrollRight();
 
