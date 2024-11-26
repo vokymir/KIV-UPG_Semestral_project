@@ -46,7 +46,7 @@
             ClientSize = new Size(582, 353);
             Controls.Add(formsPlot1);
             Name = "GraphForm";
-            Text = "GraphForm";
+            Text = "Graph for Probe";
             ResumeLayout(false);
         }
 

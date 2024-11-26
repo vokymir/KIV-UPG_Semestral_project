@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 namespace ElectricFieldVis.Controller
 {
+    // for easy and pretty inputting values
     public partial class InputBox : Form
     {
         private TextBox txtInput;
@@ -20,24 +21,24 @@ namespace ElectricFieldVis.Controller
         {
             using (var inputBox = new InputBox(title,width,height, defaultText))
             {
-                // Set the position to where the user clicked
+                // set the position where the user clicked/specified
                 inputBox.StartPosition = FormStartPosition.Manual;
                 inputBox.Location = position;
 
                 inputBox.ControlBox = false;
 
-                // Show the input box and return the result
+                // show the input box and return the result
                 if (inputBox.ShowDialog() == DialogResult.OK)
                 {
                     return inputBox.InputText;
                 }
-                return string.Empty; // If canceled or closed without input
+                return string.Empty; // if canceled or closed without input
             }
         }
 
         public InputBox(string title, int width, int height, string defaultText)
         {
-            // Basic settings for the form
+            // basic settings for the form
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.MinimizeBox = false;
@@ -51,7 +52,7 @@ namespace ElectricFieldVis.Controller
                 this.Text = title;
             }
 
-            // Create and configure the TextBox for input
+            // create and configure the TextBox for input
             txtInput = new TextBox
             {
                 Width = this.Width,
@@ -103,12 +104,12 @@ namespace ElectricFieldVis.Controller
             this.Controls.Add(txtInput);
         }
 
-        // Center the dialog at the clicked position
+        // center the dialog at the clicked position
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            // Adjust the form to ensure the input box is properly positioned on the form
-            this.Width = Math.Min(250, TextRenderer.MeasureText(this.Text, this.Font).Width + 30); // Adjust width based on the title
+            // adjust the form to ensure the input box is properly positioned on the form
+            this.Width = Math.Min(250, TextRenderer.MeasureText(this.Text, this.Font).Width + 30); // adjust width based on the title
         }
     }
 }
