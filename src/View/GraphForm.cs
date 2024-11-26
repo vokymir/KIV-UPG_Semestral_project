@@ -68,7 +68,7 @@ namespace ElectricFieldVis.View
 
         public void UpdateGraph()
         {
-            float val = FieldCalculator.CalculateFieldIntensity(FieldCalculator.CalculateFieldDirection(_probe.position, _renderer._particles));
+            float val = FieldCalculator.CalculateFieldIntensity(FieldCalculator.CalculateFieldDirection(_probe.position, _renderer.particles));
             _streamer.Add(val);
             formsPlot1.Refresh();
         }

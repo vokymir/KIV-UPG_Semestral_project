@@ -19,30 +19,88 @@ namespace ElectricFieldVis.View
     /// </summary>
     public class Renderer
     {
-        public List<Particle> _particles;
-        public Probe _mainProbe;
+        #region declarations
+
+        public List<Particle> particles;
+        public Probe mainProbe;
+
         private CustomizerForm? _customizerForm;
         private bool _particleDynamicWidth = true;
         private Color _particlePositiveColor = Color.Red;
         private Color _particleNegativeColor = Color.Blue;
         private Size _curr_client_size = new Size(800, 600);
-        public HashSet<(Probe, GraphForm)> _otherProbes = new HashSet<(Probe, GraphForm)> { };
+        private FieldColorMapper _fcm = new FieldColorMapper(0, 1E+2, FieldColorMapper.ColorScale.Thermal);
+        private float[,]? _bmp_pts_intensity = null;
+        private Point[,]? _bitmap_points = null;
         private int _bitmap_chunk_size = 4;
         private Image _particle_image;
-        public bool funMode = false;
-        public FieldColorMapper.ColorScale CS
-        {
-            get { return fcm.Color_scale; }
-            set
-            {
-                fcm.Color_scale = value;
-            }
-        }
-
         private bool _showGrid = true;
         private bool _showStaticProbes = true;
-
+        private float _scale = 1f;
+        private float _zooming_factor = 1f;
         private Vector2 _origin = Vector2.Zero;
+
+        Point[,]? _grid_points = null;
+
+        public bool funMode = false;
+        public event Action ColorScaleChanged;
+        public FieldColorMapper.ColorScale CS
+        {
+            get { return _fcm.Color_scale; }
+            set
+            {
+                _fcm.Color_scale = value;
+            }
+        }
+        public FieldColorMapper FCM { get { return _fcm; } }
+        public HashSet<(Probe, GraphForm)> otherProbes = new HashSet<(Probe, GraphForm)> { };
+        public int grid_w;
+        public int grid_h;
+        public Point[,] Bitmap_points
+        {
+            get
+            {
+                if (_bitmap_points == null)
+                {
+                    _bitmap_points = CalculateGridPoints(_bitmap_chunk_size);
+                }
+                return _bitmap_points;
+            }
+            set
+            {
+                _bitmap_points = CalculateGridPoints(_bitmap_chunk_size);
+            }
+        }
+        public float[,] Bitmap_points_intensity
+        {
+            get
+            {
+                if (_bmp_pts_intensity == null)
+                {
+                    _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+                }
+                return _bmp_pts_intensity;
+            }
+            set
+            {
+                _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+            }
+        }
+        public Point[,] Grid_points
+        {
+            get
+            {
+                if (_grid_points == null)
+                {
+                    _grid_points = CalculateGridPoints();
+                }
+                return _grid_points;
+            }
+            set
+            {
+                _grid_points = CalculateGridPoints();
+            }
+        }
         public Vector2 Origin
         {
             get
@@ -54,9 +112,6 @@ namespace ElectricFieldVis.View
                 _origin = value;
             }
         }
-
-
-        private float _scale = 1f;
         public float Scale
         {
             get
@@ -72,22 +127,29 @@ namespace ElectricFieldVis.View
                 }
             }
         }
+        public float ZoomingFactor
+        {
+            get { return _zooming_factor; }
+        }
+
+        #endregion declarations
 
         /// <summary>
-        /// Init the rendere and also set correct scaling.
+        /// Init the rendere and also set correct scaling, size and grid.
         /// </summary>
         /// <param name="particles">List of particles to render.</param>
         /// <param name="probe">Probe to render.</param>
         /// <param name="clientSize">Client size.</param>
         public Renderer(List<Particle> particles, Probe probe, Size clientSize, int grid_w, int grid_h)
         {
-            this._particles = particles;
-            this._mainProbe = probe;
-            this._grid_w = grid_w;
-            this._grid_h = grid_h;
+            this.particles = particles;
+            this.mainProbe = probe;
+            this.grid_w = grid_w;
+            this.grid_h = grid_h;
 
             _curr_client_size = clientSize;
 
+            // for FunMode
             _particle_image = Image.FromFile("Images/kohout.png");
 
             InitWindow(clientSize);
@@ -102,7 +164,6 @@ namespace ElectricFieldVis.View
         public void InitWindow(Size clientSize)
         {
             ScaleToFill(clientSize);
-
             CenterOrigin(clientSize);
         }
         public void ScaleToFill(Size? clientSize = null)
@@ -120,7 +181,7 @@ namespace ElectricFieldVis.View
             float maxX = 0;
             float maxY = 0;
 
-            foreach (Particle particle in _particles)
+            foreach (Particle particle in particles)
             {
                 float particleRadius = CalculateParticleRadius(particle);
 
@@ -130,10 +191,10 @@ namespace ElectricFieldVis.View
                 if (particle.Y + particleRadius > maxY) { maxY = particle.Y + particleRadius; };
             }
 
-            maxX = Math.Max(_mainProbe.radius, maxX);
-            minX = Math.Min(-1 * _mainProbe.radius, minX);
-            maxY = Math.Max(_mainProbe.radius, maxY);
-            minY = Math.Min(-1 * _mainProbe.radius, minY);
+            maxX = Math.Max(mainProbe.radius, maxX);
+            minX = Math.Min(-1 * mainProbe.radius, minX);
+            maxY = Math.Max(mainProbe.radius, maxY);
+            minY = Math.Min(-1 * mainProbe.radius, minY);
 
             // add padding to edges of screen, because of labels and toolbars
             float padding = 1;
@@ -143,6 +204,7 @@ namespace ElectricFieldVis.View
             float scaleY = clSize.Height / (maxY - minY + padding);
             _scale = Math.Min(scaleX, scaleY);
         }
+
         public void CenterOrigin(Size? clientSize = null)
         {
             if (clientSize == null)
@@ -163,31 +225,6 @@ namespace ElectricFieldVis.View
 
             _origin.X *= change_ratio_W;
             _origin.Y *= change_ratio_H;
-
-            /*
-            // the scaling should probably stay the same, this were my tries to get it done
-            float scale_ratio = 1f;
-
-            if (change_ratio_H > 1 && change_ratio_W > 1)
-            {
-                scale_ratio = Math.Min(change_ratio_W, change_ratio_H);
-            }
-            else if (change_ratio_H < 1 && change_ratio_W < 1)
-            {
-                scale_ratio = Math.Max(change_ratio_W, change_ratio_H);
-            }
-            // comment from here
-            else if (change_ratio_H > 1 && change_ratio_W < 1)
-            {
-                scale_ratio = change_ratio_W;
-            }
-            else if (change_ratio_H < 1 && change_ratio_W > 1)
-            {
-                scale_ratio = change_ratio_W;
-            }
-            // to here - this was my last try, but it got bigger scale overtime
-            _scale *= scale_ratio;
-            */
 
             _curr_client_size = newClientSize;
 
@@ -217,7 +254,6 @@ namespace ElectricFieldVis.View
             float y = _origin.Y - realWorldCoords.Y * _scale;
             
             Vector2 drawingCoords = new Vector2(x,y);
-
             return drawingCoords;
         }
 
@@ -248,12 +284,9 @@ namespace ElectricFieldVis.View
             }
         }
 
-
         #endregion CalculateAndTranslate
 
-
         #region Draw
-
         
         /// <summary>
         /// Main rendering loop. Renders all Particles and Probe.
@@ -262,34 +295,30 @@ namespace ElectricFieldVis.View
         /// <param name="clientSize"></param>
         public void Render(Graphics g, Size clientSize)
         {
-
             DrawBitmap(g);
 
             if (_showGrid)
             {
                 DrawGrid(g, Grid_points);
             }
+
             if (_showStaticProbes)
             {
                 DrawStaticProbes(g, Grid_points);
             }
 
-            foreach (Particle particle in _particles)
+            foreach (Particle particle in particles)
             {
                 DrawParticle(g, particle);
             }
 
-            foreach ((Probe, GraphForm) probeTwin in _otherProbes)
+            foreach ((Probe, GraphForm) probeTwin in otherProbes)
             {
                 DrawProbe(g, probeTwin.Item1);
             }
 
-            DrawProbe(g, _mainProbe);
+            DrawProbe(g, mainProbe);
         }
-
-        
-
-
 
         /// <summary>
         /// Draw one particle as filled elipse with text value and color distinction for plus and minus.
@@ -301,6 +330,7 @@ namespace ElectricFieldVis.View
             // translate coordinates to drawing coordinates
             Vector2 particleCoords = TranslateCoordinates(particle.X, particle.Y);
 
+            #region particle
             // set sizes
             float radius = CalculateParticleRadius(particle) * _scale;
             
@@ -322,6 +352,10 @@ namespace ElectricFieldVis.View
                 }
             }
 
+            #endregion particle
+
+            #region text value
+
             // write a value next to (currently on the top) the particle
             using (Brush textBrush = new SolidBrush(Color.Black))
             using (Font font = new Font("Serif", fontSize))
@@ -341,27 +375,24 @@ namespace ElectricFieldVis.View
                 g.DrawString(chargeLabel, font, textBrush, particleCoords.X - textSize.Width / 2, particleCoords.Y - radius - textSize.Height);
             }
 
+            #endregion text value
         }
 
         /// <summary>
-        /// Draw the main Probe as an arrow and text with it's value.
+        /// Draw any Probe as an arrow and text with it's value.
         /// </summary>
         /// <param name="g"></param>
         /// <param name="probe">Probe to draw.</param>
         private void DrawProbe(Graphics g, Probe probe)
         {
-            Vector2 probeDir = FieldCalculator.CalculateFieldDirection(probe.position, _particles);
+            Vector2 probeDir = FieldCalculator.CalculateFieldDirection(probe.position, particles);
             DrawProbe(g, probe, probeDir);
         }
 
-        /// <summary>
-        /// Draw the main Probe as an arrow and text with it's value.
-        /// </summary>
-        /// <param name="g"></param>
-        /// <param name="probe">Probe to draw.</param>
-        /// <param name="direction">Direction of the probe.</param>
         private void DrawProbe(Graphics g, Probe probe, Vector2 direction)
         {
+            #region math
+
             // translating into render coordinates
             Vector2 probeCoords = TranslateCoordinates(probe.position);
 
@@ -373,7 +404,6 @@ namespace ElectricFieldVis.View
             // dynamic arrow length
             if (energy > 0)
             {
-
                 // linear scaling
                 float divisor = 1E+09f;
                 float minArrowLength = _scale * 0.15f;
@@ -387,6 +417,9 @@ namespace ElectricFieldVis.View
 
             }
 
+            #endregion math
+
+            #region text
 
             // draw value text
             using (Brush textBrush = new SolidBrush(Color.Black))
@@ -408,41 +441,35 @@ namespace ElectricFieldVis.View
                 g.DrawString(chargeLabel, font, textBrush, probeCoords.X - textSize.Width / 2, probeCoords.Y + textSize.Height / 2);
             }
 
+            #endregion text
+
+            #region arrow
 
             // draw arrow
             using (Brush brush = new SolidBrush(probeColor))
             {
                 Pen pen = new Pen(brush, _scale * 0.05f);
                 pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
-                if (probe != _mainProbe)
-                {
+                if (probe != mainProbe) 
+                { // for other probes than main
                     pen.StartCap = LineCap.RoundAnchor;
                 }
                 g.DrawLine(pen, new PointF(probeCoords), new PointF(probeCoords.X + direction.X, probeCoords.Y + direction.Y));
             }
-        }
 
-        /// <summary>
-        /// OBSOLETE - only for debug.
-        /// </summary>
-        /// <param name="g"></param>
-        private void DrawOrigin(Graphics g)
-        {
-            int biggnes = (int)(_scale * 0.1);
-            g.FillEllipse(Brushes.Brown,new Rectangle((int)(_origin.X - biggnes/2),(int)(_origin.Y - biggnes/2),biggnes,biggnes));
+            #endregion arrow
         }
 
         #endregion Draw
 
-
         #region CustomizerForm
-        // Create customizer form and subscribe and handle to all its Events.
 
+        // Create customizer form and subscribe and handle to all its Events.
         public void ShowCustomizerForm(Point where)
         {
             if (_customizerForm == null || _customizerForm.IsDisposed)
             {
-                _customizerForm = new CustomizerForm(_mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth, where, fcm.Color_scale);
+                _customizerForm = new CustomizerForm(mainProbe.color,_particlePositiveColor,_particleNegativeColor, _particleDynamicWidth, where, _fcm.Color_scale);
 
                 // Subscribe to the ColorChanged event
                 _customizerForm.ProbeColorChanged += UpdateProbeColor;
@@ -460,10 +487,9 @@ namespace ElectricFieldVis.View
             _customizerForm.Focus();
         }
 
-        public event Action ColorScaleChanged;
         private void UpdateColorScale(FieldColorMapper.ColorScale scale)
         {
-            fcm.Color_scale = scale;
+            _fcm.Color_scale = scale;
             ColorScaleChanged?.Invoke();
         }
 
@@ -477,11 +503,6 @@ namespace ElectricFieldVis.View
             _showGrid = obj;
         }
 
-        private float _zooming_factor = 1f;
-        public float ZoomingFactor
-        {
-            get { return _zooming_factor; }
-        }
         private void UpdateZoomLevel(int new_zoom)
         {
             _zooming_factor = 1f * new_zoom;
@@ -504,41 +525,21 @@ namespace ElectricFieldVis.View
 
         private void UpdateProbeColor(Color color)
         {
-            _mainProbe.color = color;
+            mainProbe.color = color;
         }
 
         #endregion CustomizerForm
 
-
         #region Grid
-        Point[,]? _grid_points = null;
 
-        Point[,] Grid_points
-        {
-            get
-            {
-                if (_grid_points == null)
-                {
-                    _grid_points = CalculateGridPoints();
-                }
-                return _grid_points;
-            }
-            set
-            {
-                _grid_points = CalculateGridPoints();
-            }
-        }
-        public int _grid_w;
-        public int _grid_h;
-
-        // Calculates canvas/simulation - not real coordinates
+        // Calculates canvas/simulation grid points IN DRAWING COORDS - not real coordinates
         public Point[,] CalculateGridPoints(int override_value = 0)
         {
             int vertical_offset = 0;// width_px / 2;
             int horizontal_offset = 0;// height_px / 2;
 
-            int wid = _grid_w;
-            int hig = _grid_h;
+            int wid = grid_w;
+            int hig = grid_h;
             if (override_value != 0)
             {
                 wid = override_value;
@@ -563,6 +564,7 @@ namespace ElectricFieldVis.View
 
             return points;
         }
+
         public void DrawGrid(Graphics g, Point[,] points)
         {
             Pen pen = new Pen(Brushes.Gray, 1f);
@@ -598,13 +600,13 @@ namespace ElectricFieldVis.View
         {
             Vector2 real_world_here = GetRealWorldCoords(new Vector2(here.X, here.Y));
 
-            Vector2 vect = FieldCalculator.CalculateFieldDirection(real_world_here, _particles);
+            Vector2 vect = FieldCalculator.CalculateFieldDirection(real_world_here, particles);
             float intensity = FieldCalculator.CalculateFieldIntensity(vect);
 
             Pen pen = new Pen(Color.DarkGray, 5);
             pen.EndCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
 
-            float len = Math.Min(_grid_w, _grid_h);
+            float len = Math.Min(grid_w, grid_h);
 
             Point endHere = new Point((int)(here.X + vect.X / intensity * len), (int)(here.Y - vect.Y / intensity * len));
 
@@ -623,7 +625,6 @@ namespace ElectricFieldVis.View
 
         #endregion Grid
 
-
         #region Bitmap
 
         private void DrawBitmap(Graphics g)
@@ -634,90 +635,49 @@ namespace ElectricFieldVis.View
             int canvas_w = this._curr_client_size.Width;
             int canvas_h = this._curr_client_size.Height;
 
-            // Create a new bitmap with the appropriate dimensions
+            // bitmap correct dimensions
             Bitmap bitmap = new Bitmap(canvas_w, canvas_h, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            // Lock the bitmap's bits for unsafe access
+            // lock for unsafe 
             System.Drawing.Imaging.BitmapData bmpData = bitmap.LockBits(
                 new Rectangle(0, 0, canvas_w, canvas_h),
                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             unsafe
-            {
+            { // vey C-like, ain't it?
                 byte* ptr = (byte*)bmpData.Scan0;
-                _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
+                _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points); // so it is actual in every frame
 
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        // Calculate the color for the current point
-                        Color clr = fcm.ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
+                        Color clr = _fcm.ConvertIntensityToColor(_bmp_pts_intensity[x, y]);
 
-                        // Compute the pixel's position in the byte array
+                        // jump by four
                         int offset = (x * bmpData.Stride) + (y * 4);
 
-                        // Set pixel values (BGRA format)
-                        ptr[offset] = clr.B;     // Blue
-                        ptr[offset + 1] = clr.G; // Green
-                        ptr[offset + 2] = clr.R; // Red
+                        // set pixel (BGRA format)
+                        ptr[offset] = clr.B;     // B
+                        ptr[offset + 1] = clr.G; // G
+                        ptr[offset + 2] = clr.R; // R
                         ptr[offset + 3] = clr.A; // Alpha
                     }
                 }
             }
 
-            // Unlock the bits
+            // unlock
             bitmap.UnlockBits(bmpData);
 
-            // Draw the generated bitmap on the graphics context
+            // draw on graphics
             g.DrawImage(bitmap, new Rectangle(0, 0, bitmap.Width * _bitmap_chunk_size, bitmap.Height * _bitmap_chunk_size));
 
-            // Dispose the bitmap to free resources
+            // better get rid of
             bitmap.Dispose();
         }
 
-
-        private FieldColorMapper fcm = new FieldColorMapper(0, 1E+2,FieldColorMapper.ColorScale.Thermal);
-        
-        public FieldColorMapper FCM { get { return fcm; } }
-
-        Point[,]? _bitmap_points = null;
-
-        Point[,] Bitmap_points
-        {
-            get
-            {
-                if (_bitmap_points == null)
-                {
-                    _bitmap_points = CalculateGridPoints(_bitmap_chunk_size);
-                }
-                return _bitmap_points;
-            }
-            set
-            {
-                _bitmap_points = CalculateGridPoints(_bitmap_chunk_size);
-            }
-        }
-
-        float[,]? _bmp_pts_intensity = null;
-
-        float[,] Bitmap_points_intensity
-        {
-            get
-            {
-                if (_bmp_pts_intensity == null)
-                {
-                    _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
-                }
-                return _bmp_pts_intensity;
-            }
-            set
-            {
-                _bmp_pts_intensity = CalculateBitmapGridIntensity(Bitmap_points);
-            }
-        }
-
+        // for given points calculate intensity - from 2D array to 1D
         float[,] CalculateBitmapGridIntensity(Point[,] points)
         {
             int width = points.GetLength(0);
@@ -735,7 +695,7 @@ namespace ElectricFieldVis.View
 
                     Vector2 dir = FieldCalculator.CalculateFieldDirection(
                             real_coords,
-                            _particles
+                            particles
                         );
 
                     res[x, y] = FieldCalculator.CalculateFieldIntensity(dir) / 1E+09f;
@@ -745,7 +705,6 @@ namespace ElectricFieldVis.View
             return res;
         }
 
-    
         #endregion Bitmap
     }
 }

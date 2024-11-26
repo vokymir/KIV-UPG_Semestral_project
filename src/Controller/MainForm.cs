@@ -249,8 +249,8 @@ namespace ElectricFieldVis.Controller
             }
 
             InitializeModel(newScen);
-            _renderer._particles = this._particles;
-            _renderer._mainProbe = this._probe;
+            _renderer.particles = this._particles;
+            _renderer.mainProbe = this._probe;
         }
 
         private void Click_save(object? sender, EventArgs e)
@@ -365,7 +365,7 @@ namespace ElectricFieldVis.Controller
             int second_divisor = 10;
             if (Math.Floor(currentTime * second_divisor) - Math.Floor(second_divisor * (currentTime - deltaTime)) >= 1)
             {
-                foreach( (Probe, GraphForm) probeGraph in _renderer._otherProbes)
+                foreach( (Probe, GraphForm) probeGraph in _renderer.otherProbes)
                 {
                     probeGraph.Item2.UpdateGraph();
                 }
@@ -580,7 +580,7 @@ namespace ElectricFieldVis.Controller
             Probe? the_clicked_one = null;
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
 
-            foreach ((Probe, GraphForm) pg in _renderer._otherProbes)
+            foreach ((Probe, GraphForm) pg in _renderer.otherProbes)
             {
                 Probe probe = pg.Item1 as Probe;
                 float probe_radius = 0.075f;
@@ -632,7 +632,7 @@ namespace ElectricFieldVis.Controller
         {
             if (Form.ModifierKeys == Keys.Control)
             { // remove probe from _renderer and make color slot available
-                _renderer._otherProbes.RemoveWhere(x =>
+                _renderer.otherProbes.RemoveWhere(x =>
                 {
                     if (x.Item1.ID == the_probe.ID)
                     {
@@ -679,7 +679,7 @@ namespace ElectricFieldVis.Controller
             }
 
             this._particles.Add(new_particle);
-            this._renderer._particles.Add(new_particle);
+            this._renderer.particles.Add(new_particle);
         }
 
         private void CreateStaticProbe(MouseEventArgs e)
@@ -704,14 +704,14 @@ namespace ElectricFieldVis.Controller
             probe.ID = id;
             GraphForm graph = new GraphForm(probe, _renderer);
 
-            _renderer._otherProbes.Add((probe, graph));
+            _renderer.otherProbes.Add((probe, graph));
             OtherProbesChanged?.Invoke();
         }
         
         private void DestroyParticle(Particle the_clicked_one)
         {
             this._particles.Remove(the_clicked_one);
-            this._renderer._particles.Remove(the_clicked_one);
+            this._renderer.particles.Remove(the_clicked_one);
         }
 
         #endregion interactivity

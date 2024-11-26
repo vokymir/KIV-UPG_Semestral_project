@@ -61,7 +61,7 @@ namespace ElectricFieldVis.View
             int buttonX = 10; // Starting position for buttons
             int buttonY = 10;
 
-            foreach ((Probe probe, GraphForm graphForm) in _rnd._otherProbes)
+            foreach ((Probe probe, GraphForm graphForm) in _rnd.otherProbes)
             {
                 // Create a new button for each probe
                 Button probeButton = new Button
@@ -82,8 +82,8 @@ namespace ElectricFieldVis.View
                     {
                         // If the graph form was closed, create a new one
                         gf = new GraphForm(p, _rnd);
-                        _rnd._otherProbes.RemoveWhere(x => x.Item1 == p);
-                        _rnd._otherProbes.Add((p, gf));
+                        _rnd.otherProbes.RemoveWhere(x => x.Item1 == p);
+                        _rnd.otherProbes.Add((p, gf));
                         gf.Show();
                     }
                     else
