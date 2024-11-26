@@ -23,7 +23,7 @@ namespace ElectricFieldVis.View
 
         public void DrawLegend(Graphics g, Rectangle bounds)
         {
-            // Bounds rect
+            // bounds rect
             Rectangle boundsRect = new Rectangle(
                 bounds.Right - LEGEND_WIDTH - 10,
                 bounds.Top - 10,
@@ -31,7 +31,7 @@ namespace ElectricFieldVis.View
                 LEGEND_HEIGHT + LABEL_PADDING * 4
             );
 
-            // Create gradient rectangle
+            // gradient rectangle
             Rectangle gradientRect = new Rectangle(
                 bounds.Right - LEGEND_WIDTH,
                 bounds.Top,
@@ -39,19 +39,19 @@ namespace ElectricFieldVis.View
                 LEGEND_HEIGHT
             );
 
-            // Draw the color gradient
+            // draw the color gradient
             using (Bitmap gradientBitmap = new Bitmap(gradientRect.Width, gradientRect.Height))
             {
                 for (int y = 0; y < gradientRect.Height; y++)
                 {
-                    // Calculate intensity for this y position (bottom = min, top = max)
+                    // intensity for this y position (bottom = min, top = max)
                     float normalizedPosition = 1 - (float)y / gradientRect.Height;
                     float intensity = (float)(_colorMapper.MinIntensity +
                         normalizedPosition * (_colorMapper.MaxIntensity - _colorMapper.MinIntensity));
 
                     Color color = _colorMapper.ConvertIntensityToColor(intensity);
 
-                    // Draw a line of this color
+                    // draw a line of this color
                     using (Pen pen = new Pen(color))
                     {
                         for (int x = 0; x < gradientRect.Width; x++)
@@ -63,20 +63,20 @@ namespace ElectricFieldVis.View
 
                 Brush brush = new SolidBrush(Color.FromArgb(200, Color.White));
 
-                // Draw background for bitmap
+                // draw background for bitmap
                 g.FillRectangle(brush, boundsRect);
 
-                // Draw the bitmap
+                // draw the bitmap
                 g.DrawImage(gradientBitmap, gradientRect);
             }
 
-            // Draw border around the gradient
+            // draw border around the gradient
             using (Pen borderPen = new Pen(Color.Black, 1))
             {
                 g.DrawRectangle(borderPen, gradientRect);
             }
 
-            // Draw labels
+            // draw labels
             using (StringFormat format = new StringFormat())
             {
                 format.Alignment = StringAlignment.Near;
@@ -90,14 +90,14 @@ namespace ElectricFieldVis.View
 
                     int y = gradientRect.Top + (int)(normalizedPosition * gradientRect.Height);
 
-                    // Draw tick mark
+                    // draw tick mark
                     g.DrawLine(Pens.Black,
                         gradientRect.Right,
                         y,
                         gradientRect.Right + 5,
                         y);
 
-                    // Draw label
+                    // draw label
                     string label = value.ToString("F1");
                     g.DrawString(label,
                         _font,
@@ -108,7 +108,7 @@ namespace ElectricFieldVis.View
                 }
             }
 
-            // Draw title
+            // draw title
             using (StringFormat titleFormat = new StringFormat())
             {
                 titleFormat.Alignment = StringAlignment.Center;
