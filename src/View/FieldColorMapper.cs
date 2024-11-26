@@ -24,10 +24,10 @@ namespace ElectricFieldVis.View
 
         public enum ColorScale
         {
-            BlueRed,    // Blue to Red
-            Rainbow,     // Full rainbow spectrum
-            Plasma,      // Similar to matplotlib's plasma
-            Thermal     // Black to White through Red/Yellow
+            BlueRed,    // blue to red
+            Rainbow,     // full rainbow spectrum
+            Plasma,      // similar to matplotlib's plasma
+            Thermal     // black to white through red/yellow - darkmode
         }
 
         public FieldColorMapper(double minIntensity, double maxIntensity, ColorScale colorScale = ColorScale.BlueRed)
@@ -39,9 +39,9 @@ namespace ElectricFieldVis.View
 
         public Color ConvertIntensityToColor(float intensity)
         {
-            // Normalize intensity to [0,1] range
+            // normalize intensity to [0,1] range
             double normalized = (intensity - _minIntensity) / (_maxIntensity - _minIntensity);
-            normalized = Math.Max(0, Math.Min(1, normalized)); // Clamp to [0,1]
+            normalized = Math.Max(0, Math.Min(1, normalized)); // clamp to [0,1]
 
             return _colorScale switch
             {
@@ -55,20 +55,20 @@ namespace ElectricFieldVis.View
 
         private static Color BlueRedScale(double normalized)
         {
-            // Blue (240°) to Red (0°) in HSV space
+            // blue 240° to red 0° in HSV space
             return HSVToRGB(240 * (1 - normalized), 1, 1);
         }
 
         private static Color RainbowScale(double normalized)
         {
-            // Purple -> Blue -> Cyan -> Green -> Yellow -> Red
+            // purple > blue > cyan > green > yellow > red
             double hue = 270 - (normalized * 270);
             return HSVToRGB(hue, 1, 1);
         }
 
         private static Color PlasmaScale(double normalized)
         {
-            // Approximation of matplotlib's plasma colormap
+            // approximation of matplotlib's plasma colormap
             if (normalized < 0.25)
             {
                 return InterpolateColor(Color.FromArgb(13, 8, 135), Color.FromArgb(126, 3, 168), normalized * 4);
@@ -84,26 +84,26 @@ namespace ElectricFieldVis.View
             else
             {
                 return InterpolateColor(Color.FromArgb(248, 149, 64), Color.FromArgb(240, 249, 33), (normalized - 0.75) * 4);
-            }
+            }// what a nice code, wanna switch?
         }
 
         private static Color ThermalScale(double normalized)
         {
             if (normalized < 0.33)
             {
-                // Black to Red
+                // black to red
                 int value = (int)(normalized * 3 * 255);
                 return Color.FromArgb(value, 0, 0);
             }
             else if (normalized < 0.66)
             {
-                // Red to Yellow
+                // red to yellow
                 int value = (int)((normalized - 0.33) * 3 * 255);
                 return Color.FromArgb(255, value, 0);
             }
             else
             {
-                // Yellow to White
+                // yellow to white
                 int value = (int)((normalized - 0.66) * 3 * 255);
                 return Color.FromArgb(255, 255, Math.Max(0, Math.Min(255, value)));
             }
