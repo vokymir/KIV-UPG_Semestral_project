@@ -9,21 +9,35 @@ namespace ElectricFieldVis.Controller
 {
     public partial class MainForm : Form
     {
-        private Renderer _renderer;
+        #region declarations
+
+        private readonly float _timeflow_speed_LOWER_BOUND = 0.1f;
+        private readonly float _timeflow_speed_UPPER_BOUND = 10f;
+
         private List<Particle> _particles;
-        private Probe _probe;
-        private System.Windows.Forms.Timer _timer;
-        private float _timeElapsed = 0f;
-        private float _lastUpdateTime = 0f;
-        private int _fps = 30;
+        private Renderer _renderer;
         private StatsForm _statsForm;
         private LegendForm? _legendForm;
         private MenuStrip _menuStrip;
-        public string _scenarioName = "";
-        private float _timeflow_speed = 1.0f;
+        private OtherProbesForm? _opf;
+        private Particle? _moving_particle = null;
+        private Probe _probe;
+        private Probe? _moving_probe = null;
+        private System.Windows.Forms.Timer _timer;
+        private Vector2 _map_position_before = Vector2.Zero;
         private bool _funMode = false;
-        public bool FunMode { get { return _funMode; } }
-        
+        private bool _moving_map = false;
+        private bool _zooming = false;
+        private float _lastUpdateTime = 0f;
+        private float _timeElapsed = 0f;
+        private float _timeflow_speed = 1.0f;
+        private int _fps = 30;
+        private bool[] static_probe_ids = new bool[360];
+        public string _scenarioName = "";
+
+        public event Action OtherProbesChanged;
+
+        #endregion declarations
 
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
@@ -44,6 +58,7 @@ namespace ElectricFieldVis.Controller
             this.Location = new Point(300, 0);
             this.StartPosition = FormStartPosition.Manual;
 
+            // subscribe
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(MainForm_KeyDown);
             this.drawingPanel.MouseDown += MainForm_MouseDown;
@@ -51,7 +66,6 @@ namespace ElectricFieldVis.Controller
             this.drawingPanel.MouseUp += MainForm_MouseUp;
             this.drawingPanel.MouseWheel += MainForm_MouseWheel;
         }
-
 
         #region init
 
@@ -65,8 +79,6 @@ namespace ElectricFieldVis.Controller
             _particles = scenario.particles;
             _probe = new Probe();
             _scenarioName = scenario.isDefault ? "0" : scenarioName;
-            
-            
         }
 
         /// <summary>
@@ -76,7 +88,6 @@ namespace ElectricFieldVis.Controller
         {
             _renderer = new Renderer(_particles, _probe, this.ClientSize, grid_w, grid_h);
         }
-        
 
         /// <summary>
         /// Init Controller by starting timer.
@@ -90,6 +101,7 @@ namespace ElectricFieldVis.Controller
             _timer.Start();
         }
 
+        // Make other windows discoverable
         private void InitializeOtherWindows()
         {
             CreateMenu();
@@ -98,24 +110,6 @@ namespace ElectricFieldVis.Controller
         #endregion init
 
         #region menu
-
-        private void ShowStatsForm()
-        {
-            if (_statsForm == null || _statsForm.IsDisposed)
-            {
-                _statsForm = new StatsForm();
-                
-                Point where = new Point(
-                    this.Left,
-                    this.Top + 60
-                );
-                _statsForm.StartPosition = FormStartPosition.Manual;
-                _statsForm.Location = where;
-                _statsForm.Show();
-            }
-            _statsForm.Activate();
-            _statsForm.Focus();
-        }
 
         private void CreateMenu()
         {
@@ -133,6 +127,9 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem other_probes = new ToolStripMenuItem("Added probes");
             ToolStripMenuItem funMode_toggle = new ToolStripMenuItem("Fun Mode OFF");
             funMode_toggle.Name = "fun";
+
+            // add visualy to menu
+            _menuStrip.Items.AddRange([stats, customizer, help, scenario, legend, time, other_probes, funMode_toggle]);
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
@@ -153,7 +150,7 @@ namespace ElectricFieldVis.Controller
 
             // main menu
             stats.Click += Click_stats;
-            customizer.Click += Click_custom;
+            customizer.Click += Click_customizer;
             legend.Click += Click_legend;
             other_probes.Click += Click_other_probes;
             funMode_toggle.Click += Click_funMode;
@@ -171,19 +168,9 @@ namespace ElectricFieldVis.Controller
             resetTime.Click += Click_resetTime;
             fasterTime.Click += Click_fasterTime;
             customTime.Click += Click_customTime;
-
-            // add visualy to menu
-            _menuStrip.Items.Add(stats);
-            _menuStrip.Items.Add(customizer);
-            _menuStrip.Items.Add(help);
-            _menuStrip.Items.Add(scenario);
-            _menuStrip.Items.Add(legend);
-            _menuStrip.Items.Add(time);
-            _menuStrip.Items.Add(other_probes);
-            _menuStrip.Items.Add(funMode_toggle);
         }
 
-        //public event Action<bool> FunModeClicked;
+        #region click on menu items
         private void Click_funMode(object? sender, EventArgs e)
         {
             _funMode = !_funMode;
@@ -193,8 +180,6 @@ namespace ElectricFieldVis.Controller
             this._renderer.funMode = _funMode;
         }
 
-        public event Action OtherProbesChanged;
-        public OtherProbesForm? _opf;
         private void Click_other_probes(object? sender, EventArgs e)
         {
             if (_opf != null)
@@ -210,7 +195,7 @@ namespace ElectricFieldVis.Controller
 
         private void Click_customTime(object? sender, EventArgs e)
         {
-            Point pt = new Point(this.Location.X, this.Location.Y);
+            Point pt = new Point(this.Location.X + this.Width / 2 - 100, this.Location.Y + this.Height / 2);
             string input = InputBox.Show("Desired Timeflow Speed", pt);
             if (input != "")
             {
@@ -225,7 +210,7 @@ namespace ElectricFieldVis.Controller
 
         private void Click_resetTime(object? sender, EventArgs e)
         {
-            SetTimeflowSpeed(0.0f);
+            SetTimeflowSpeed("reset");
         }
 
         private void Click_slowerTime(object? sender, EventArgs e)
@@ -304,7 +289,7 @@ namespace ElectricFieldVis.Controller
             _renderer.CenterOrigin();
         }
 
-        private void Click_custom(object? sender, EventArgs e)
+        private void Click_customizer(object? sender, EventArgs e)
         {
             Point where = new Point(
                 this.Left + 300,
@@ -315,14 +300,27 @@ namespace ElectricFieldVis.Controller
 
         private void Click_stats(object? sender, EventArgs e)
         {
-
             ShowStatsForm();
         }
 
-        private void UpdateProbeColor(Color newColor)
+        #endregion click on menu items
+
+        private void ShowStatsForm()
         {
-            _probe.color = newColor;
-            Invalidate(); // Redraw the arrow with the new color
+            if (_statsForm == null || _statsForm.IsDisposed)
+            {
+                _statsForm = new StatsForm();
+
+                Point where = new Point(
+                    this.Left,
+                    this.Top + 60
+                );
+                _statsForm.StartPosition = FormStartPosition.Manual;
+                _statsForm.Location = where;
+                _statsForm.Show();
+            }
+            _statsForm.Activate();
+            _statsForm.Focus();
         }
 
         public void UpdateStatsForm()
@@ -344,14 +342,14 @@ namespace ElectricFieldVis.Controller
         #region time
 
         /// <summary>
-        /// Update the frame every time it is called.
+        /// Update the frame every tick.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnTimerTick(object? sender, EventArgs e)
         {
             float currentTime = Environment.TickCount / 1000f; // time in seconds
-            float deltaTime = (currentTime - _lastUpdateTime) * _timeflow_speed;
+            float deltaTime = (currentTime - _lastUpdateTime) * _timeflow_speed; // timeflow_speed for changing speed
             _lastUpdateTime = currentTime;
 
             _timeElapsed += deltaTime;
@@ -362,6 +360,7 @@ namespace ElectricFieldVis.Controller
             
             UpdateStatsForm();
 
+            // Only update graph each milisecond, to have consistent X axis value.
             // miliseconds are the best, dont change it unless change graph X ax label in GraphForm.cs
             int second_divisor = 10;
             if (Math.Floor(currentTime * second_divisor) - Math.Floor(second_divisor * (currentTime - deltaTime)) >= 1)
@@ -388,20 +387,15 @@ namespace ElectricFieldVis.Controller
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            
             _renderer.Render(e.Graphics,this.ClientSize);
-            
         }
 
-        private float _timeflow_speed_LOWER_BOUND = 0.1f;
-        private float _timeflow_speed_UPPER_BOUND = 10f;
         // multiply speed by multiplier
-        // 0.0 means reset to 1
         private void SetTimeflowSpeed(float multiplier)
         {
             if (multiplier == 0.0f)
             {
-                _timeflow_speed = 1f;
+                SetTimeflowSpeed("reset");
                 return;
             }
 
@@ -409,11 +403,16 @@ namespace ElectricFieldVis.Controller
             SetTimeflowSpeed(val, true);
         }
 
-        // custom
+        // set custom timeflow
         private void SetTimeflowSpeed(string str)
         {
             if (str == "")
             {
+                return;
+            }
+            if (str == "reset")
+            {
+                SetTimeflowSpeed(1, true);
                 return;
             }
 
@@ -434,7 +433,7 @@ namespace ElectricFieldVis.Controller
             }
         }
 
-        // I am sorry
+        // I am sorry, but i already got the function
         private void SetTimeflowSpeed(float value, bool I_WANT_TO_SET_THIS_VALUE_not_multiply)
         {
             if (value <= _timeflow_speed_UPPER_BOUND
@@ -453,14 +452,10 @@ namespace ElectricFieldVis.Controller
             Utils.HandleCtrlW(this, e);
             Utils.HandleKeyboard(this,_renderer,e);
         }
-
-        private Vector2 _map_position_before = Vector2.Zero;
-        private bool _moving_map = false;
-        private Particle? _moving_particle = null;
-        private Probe? _moving_probe = null;
         
         private void MainForm_MouseDown(object? sender, MouseEventArgs e)
         {
+            // right buttom is only for map moving
             if (e.Button == MouseButtons.Right)
             {
                 _moving_map = true;
@@ -468,18 +463,18 @@ namespace ElectricFieldVis.Controller
             }
             if (e.Button == MouseButtons.Left)
             {
-                // if not hit any particle
+                // left button is multi-useful
                 Particle? the_one = WasParticleClicked(e);
                 Probe? the_probe = WasProbeClicked(e);
                 if (the_one != null)
-                {
+                { // either click on particle
                     HandleParticleOnClick(e, the_one);
                 }else if (the_probe != null)
-                {
+                { // or on probe
                     HandleProbeOnClick(e, the_probe);
                 }
                 else
-                {
+                { // or elsewhere
                     if (Control.ModifierKeys == Keys.Control)
                     {
                         CreateNewParticle(e);
@@ -493,32 +488,96 @@ namespace ElectricFieldVis.Controller
 
         }
 
-        private void HandleProbeOnClick(MouseEventArgs e, Probe the_probe)
+        private void MainForm_MouseMove(object? sender, MouseEventArgs e)
         {
-            if (Form.ModifierKeys == Keys.Control)
+            // moving map when right button clicked
+            if (_moving_map && e.Button == MouseButtons.Right)
             {
-                _renderer._otherProbes.RemoveWhere(x =>
+                Vector2 map_position_now = new Vector2(e.X, e.Y);
+                Vector2 difference = map_position_now - _map_position_before;
+                _renderer.Origin = _renderer.Origin + difference;
+                _map_position_before = map_position_now;
+            }
+            // move particle if should
+            if (_moving_particle != null)
+            {
+                if (e.X <= this.drawingPanel.Left || e.Y <= this.drawingPanel.Top ||
+                    e.X >= this.drawingPanel.Right || e.Y >= this.drawingPanel.Bottom)
                 {
-                    if (x.Item1.ID == the_probe.ID)
-                    {
-                        x.Item2.Dispose(); // Dispose GraphForm
-                        static_probe_ids[x.Item1.ID] = false; // make color slot available
-                        return true;       // Remove
-                    }
-                    return false;          // Keep 
-                });
+                    return;
+                }
+                Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+                _moving_particle.X = click.X;
+                _moving_particle.Y = click.Y;
+            }
+            // move probe if should
+            if (_moving_probe != null)
+            {
+                if (e.X <= this.drawingPanel.Left || e.Y <= this.drawingPanel.Top ||
+                    e.X >= this.drawingPanel.Right || e.Y >= this.drawingPanel.Bottom)
+                {
+                    return;
+                }
+                Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+                _moving_probe.position = click;
+            }
+        }
 
-                OtherProbesChanged?.Invoke();
-                return;
+        // reset moving status to false
+        private void MainForm_MouseUp(object? sender, MouseEventArgs e)
+        {
+            _moving_map = false;
+            _moving_particle = null;
+            _moving_probe = null;
+        }
+
+        // zooming
+        private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            // zooming with protection of speed-zooming
+            if (!_zooming && e.Delta > 0)
+            {
+                _zooming = true;
+                _renderer.Scale = _renderer.ZoomingFactor;
+                _zooming = false;
+            }
+            else if (!_zooming && e.Delta < 0)
+            {
+                _zooming = true;
+                _renderer.Scale = -1 * _renderer.ZoomingFactor;
+                _zooming = false;
+            }
+        }
+
+        // return clicked particle or null
+        private Particle? WasParticleClicked(MouseEventArgs e)
+        {
+            Particle? the_clicked_one = null;
+            Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
+
+            for (int i = 0; i < _particles.Count; i++)
+            {
+
+                Particle particle = _particles[i];
+                float particle_radius = _renderer.CalculateParticleRadius(particle);
+
+                if (click.X <= particle.X + particle_radius &&
+                    click.X >= particle.X - particle_radius &&
+                    click.Y <= particle.Y + particle_radius &&
+                    click.Y >= particle.Y - particle_radius
+                    )
+                {
+                    the_clicked_one = particle;
+                    break;
+                }
             }
 
-            _moving_probe = the_probe;
+            return the_clicked_one;
         }
 
         private Probe? WasProbeClicked(MouseEventArgs e)
         {
             Probe? the_clicked_one = null;
-
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
 
             foreach ((Probe, GraphForm) pg in _renderer._otherProbes)
@@ -539,13 +598,62 @@ namespace ElectricFieldVis.Controller
 
             return the_clicked_one;
         }
+        
+        // return true if done something
+        private bool HandleParticleOnClick(MouseEventArgs e, Particle the_clicked_one)
+        {
+            if (Form.ModifierKeys == Keys.Control)
+            { // if intention to change value of particle
+                Point here = this.PointToScreen(e.Location);
+                string input = InputBox.Show("", here, the_clicked_one.Expression);
+
+                // esc inputbox
+                if (input == "")
+                {
+                    return true;
+                }
+                if (input.Contains('x'))
+                {
+                    DestroyParticle(the_clicked_one);
+                    return true;
+                }
+
+                the_clicked_one.setExpression(input);
+                return true;
+            }
+
+            // if intention to move particle
+            _moving_particle = the_clicked_one;
+
+            return true;
+        }
+
+        private void HandleProbeOnClick(MouseEventArgs e, Probe the_probe)
+        {
+            if (Form.ModifierKeys == Keys.Control)
+            { // remove probe from _renderer and make color slot available
+                _renderer._otherProbes.RemoveWhere(x =>
+                {
+                    if (x.Item1.ID == the_probe.ID)
+                    {
+                        x.Item2.Dispose(); // dispose GraphForm
+                        static_probe_ids[x.Item1.ID] = false; // make color slot available
+                        return true;       // remove
+                    }
+                    return false;          // keep 
+                });
+
+                OtherProbesChanged?.Invoke();
+                return;
+            }
+
+            _moving_probe = the_probe;
+        }
 
         private void CreateNewParticle(MouseEventArgs e)
         {
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
-
             Point here = this.PointToScreen(e.Location);
-
             string input = InputBox.Show("Enter Particle Value:",here);
 
             // esc inputbox
@@ -570,16 +678,13 @@ namespace ElectricFieldVis.Controller
                 return ;
             }
 
-
             this._particles.Add(new_particle);
             this._renderer._particles.Add(new_particle);
         }
 
-        bool[] static_probe_ids = new bool[360]; 
         private void CreateStaticProbe(MouseEventArgs e)
         {
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
-
             int id = Array.FindIndex(static_probe_ids, val => !val);
             int color_count = 360;
 
@@ -593,7 +698,7 @@ namespace ElectricFieldVis.Controller
             double s = 1.0;
             double v = 1.0;
 
-            Color clr = ColorFromHSV(h, s, v);
+            Color clr = Utils.ColorFromHSV(h, s, v);
 
             Probe probe = new Probe(click, 0, clr);
             probe.ID = id;
@@ -602,154 +707,12 @@ namespace ElectricFieldVis.Controller
             _renderer._otherProbes.Add((probe, graph));
             OtherProbesChanged?.Invoke();
         }
-
-        public Color ColorFromHSV(double hue, double saturation, double value)
-        {
-            int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
-            double f = hue / 60 - Math.Floor(hue / 60);
-
-            value = value * 255;
-            int v = Convert.ToInt32(value);
-            int p = Convert.ToInt32(value * (1 - saturation));
-            int q = Convert.ToInt32(value * (1 - f * saturation));
-            int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
-
-            if (hi == 0)
-                return Color.FromArgb(255, v, t, p);
-            else if (hi == 1)
-                return Color.FromArgb(255, q, v, p);
-            else if (hi == 2)
-                return Color.FromArgb(255, p, v, t);
-            else if (hi == 3)
-                return Color.FromArgb(255, p, q, v);
-            else if (hi == 4)
-                return Color.FromArgb(255, t, p, v);
-            else
-                return Color.FromArgb(255, v, p, q);
-        }
-
-        private void MainForm_MouseUp(object? sender, MouseEventArgs e)
-        {
-            _moving_map = false;
-            _moving_particle = null;
-            _moving_probe = null;
-        }
-
-        private void MainForm_MouseMove(object? sender, MouseEventArgs e)
-        {
-            if (_moving_map && e.Button == MouseButtons.Right)
-            {
-                Vector2 map_position_now = new Vector2(e.X, e.Y);
-                Vector2 difference =  map_position_now - _map_position_before;
-                _renderer.Origin = _renderer.Origin + difference;
-                _map_position_before = map_position_now;
-            }
-            if (_moving_particle != null)
-            {
-                if (e.X <= this.drawingPanel.Left || e.Y <= this.drawingPanel.Top ||
-                    e.X >= this.drawingPanel.Right || e.Y >= this.drawingPanel.Bottom)    
-                {
-                    return;
-                }
-                Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
-                _moving_particle.X = click.X;
-                _moving_particle.Y = click.Y;
-            }
-            if (_moving_probe != null)
-            {
-                if (e.X <= this.drawingPanel.Left || e.Y <= this.drawingPanel.Top ||
-                    e.X >= this.drawingPanel.Right || e.Y >= this.drawingPanel.Bottom)
-                {
-                    return;
-                }
-                Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
-                _moving_probe.position = click;
-            }
-        }
-        private bool _zooming = false;
-        private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
-        {
-            if (!_zooming && e.Delta > 0)
-            {
-                _zooming = true;
-                _renderer.Scale = _renderer.ZoomingFactor;
-                _zooming = false;
-            }else if (!_zooming && e.Delta < 0)
-            {
-                _zooming = true;
-                _renderer.Scale = - 1 * _renderer.ZoomingFactor;
-                _zooming = false;
-            }
-        }
-        // return clicked particle or null
-        private Particle? WasParticleClicked(MouseEventArgs e)
-        {
-            Particle? the_clicked_one = null;
-
-            Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
-
-            for (int i = 0; i < _particles.Count; i++)
-            {
-
-                Particle particle = _particles[i];
-                float particle_radius = _renderer.CalculateParticleRadius(particle);
-
-                //MessageBox.Show($"${click} vs ${particle.X},${particle.Y}");
-
-                if (click.X <= particle.X + particle_radius &&
-                    click.X >= particle.X - particle_radius &&
-                    click.Y <= particle.Y + particle_radius &&
-                    click.Y >= particle.Y - particle_radius
-                    )
-                {
-                    the_clicked_one = particle;
-                    break;
-                }
-            }
-
-            return the_clicked_one;
-        }
-
-        // return true if done something
-        private bool HandleParticleOnClick(MouseEventArgs e, Particle the_clicked_one)
-        {
-            
-            if (Form.ModifierKeys == Keys.Control)
-            {
-                // if intention to change value of particle
-                Point here = this.PointToScreen(e.Location);
-                string input = InputBox.Show("", here, the_clicked_one.Expression);
-
-                // esc inputbox
-                if (input == "")
-                {
-                    return true;
-                }
-                // destroy particle
-                if (input.Contains('x'))
-                {
-                    DestroyParticle(the_clicked_one);
-                    return true;
-                }
-
-                the_clicked_one.setExpression(input);
-
-                return true;
-            }
-
-            // if intention to move particle
-            _moving_particle = the_clicked_one;
-            
-            return true;
-        }
-
+        
         private void DestroyParticle(Particle the_clicked_one)
         {
             this._particles.Remove(the_clicked_one);
             this._renderer._particles.Remove(the_clicked_one);
         }
-
-
 
         #endregion interactivity
     }
