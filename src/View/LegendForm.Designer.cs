@@ -46,7 +46,7 @@
             ClientSize = new Size(800, 450);
             Controls.Add(panel1);
             Name = "LegendForm";
-            Text = "LegendForm";
+            Text = "Legend";
             ResumeLayout(false);
         }
 

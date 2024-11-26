@@ -495,15 +495,49 @@ namespace ElectricFieldVis.Controller
         {
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
 
-            int h = ;
-            int s = ;
-            int v = (_renderer._otherProbes.Count * 37) % 256;
-            
+            int probs_count = _renderer._otherProbes.Count;
+            int color_count = 360;
 
-            Probe probe = new Probe(click, 0, Color.Aqua);
+            if (probs_count >= color_count)
+            {
+                return;
+            }
+
+            double h = (probs_count * 37) % color_count;
+            double s = 1.0;
+            double v = 1.0;
+
+            Color clr = ColorFromHSV(h, s, v);
+
+            Probe probe = new Probe(click, 0, clr);
             GraphForm graph = new GraphForm(probe, _renderer);
 
             _renderer._otherProbes.Add((probe, graph));          
+        }
+
+        public Color ColorFromHSV(double hue, double saturation, double value)
+        {
+            int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
+            double f = hue / 60 - Math.Floor(hue / 60);
+
+            value = value * 255;
+            int v = Convert.ToInt32(value);
+            int p = Convert.ToInt32(value * (1 - saturation));
+            int q = Convert.ToInt32(value * (1 - f * saturation));
+            int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
+
+            if (hi == 0)
+                return Color.FromArgb(255, v, t, p);
+            else if (hi == 1)
+                return Color.FromArgb(255, q, v, p);
+            else if (hi == 2)
+                return Color.FromArgb(255, p, v, t);
+            else if (hi == 3)
+                return Color.FromArgb(255, p, q, v);
+            else if (hi == 4)
+                return Color.FromArgb(255, t, p, v);
+            else
+                return Color.FromArgb(255, v, p, q);
         }
 
         private void MainForm_MouseUp(object? sender, MouseEventArgs e)
