@@ -482,7 +482,17 @@ namespace ElectricFieldVis.Controller
         {
             if (Form.ModifierKeys == Keys.Control)
             {
-                _renderer._otherProbes.RemoveWhere(x => x.Item1 == the_probe);
+                _renderer._otherProbes.RemoveWhere(x =>
+                {
+                    if (x.Item1.ID == the_probe.ID)
+                    {
+                        x.Item2.Dispose(); // Dispose GraphForm
+                        static_probe_ids[x.Item1.ID] = false; // make color slot available
+                        return true;       // Remove
+                    }
+                    return false;          // Keep 
+                });
+
                 OtherProbesChanged?.Invoke();
                 return;
             }
@@ -550,25 +560,28 @@ namespace ElectricFieldVis.Controller
             this._renderer._particles.Add(new_particle);
         }
 
+        bool[] static_probe_ids = new bool[360]; 
         private void CreateStaticProbe(MouseEventArgs e)
         {
             Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
 
-            int probs_count = _renderer._otherProbes.Count;
+            int id = Array.FindIndex(static_probe_ids, val => !val);
             int color_count = 360;
 
-            if (probs_count >= color_count)
+            if (id >= color_count || id == -1)
             {
                 return;
             }
+            static_probe_ids[id] = true;
 
-            double h = (probs_count * 37) % color_count;
+            double h = (id * 37) % color_count;
             double s = 1.0;
             double v = 1.0;
 
             Color clr = ColorFromHSV(h, s, v);
 
             Probe probe = new Probe(click, 0, clr);
+            probe.ID = id;
             GraphForm graph = new GraphForm(probe, _renderer);
 
             _renderer._otherProbes.Add((probe, graph));
@@ -636,7 +649,6 @@ namespace ElectricFieldVis.Controller
                 }
                 Vector2 click = _renderer.GetRealWorldCoords(new Vector2(e.X, e.Y));
                 _moving_probe.position = click;
-                OtherProbesChanged?.Invoke();
             }
         }
         private bool _zooming = false;

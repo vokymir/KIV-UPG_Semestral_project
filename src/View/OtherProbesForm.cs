@@ -51,7 +51,7 @@ namespace ElectricFieldVis.View
             // Clear existing buttons if dynamically added
             foreach (var control in Controls.OfType<Button>().ToList())
             {
-                if (control.Tag is Probe)
+                if (control.Text.Contains("Probe"))
                 {
                     Controls.Remove(control);
                     control.Dispose();
@@ -66,7 +66,7 @@ namespace ElectricFieldVis.View
                 // Create a new button for each probe
                 Button probeButton = new Button
                 {
-                    Text = $"Probe X:{probe.position.X:F1} Y:{probe.position.Y:F1}",
+                    Text = $"Probe {probe.ID}",
                     ForeColor = probe.color,
                     Tag = (probe, graphForm),  // Store the probe and its GraphForm
                     Location = new Point(buttonX, buttonY),

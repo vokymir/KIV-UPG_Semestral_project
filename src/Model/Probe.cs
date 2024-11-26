@@ -20,6 +20,7 @@ namespace ElectricFieldVis.Model
 
         // doesn't really belongs here for the data, but for the visual representation
         public Color color { get; set; }
+        public int ID { get; set; }
 
         public Probe()
         {
