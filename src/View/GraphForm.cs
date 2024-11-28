@@ -37,7 +37,7 @@ namespace ElectricFieldVis.View
             formsPlot1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             formsPlot1.Dock = DockStyle.Fill;
 
-            formsPlot1.Plot.Title("Graph for probe this color");
+            formsPlot1.Plot.Title($"Graph for probe {probe.ID.ToString()}");
             formsPlot1.Plot.Axes.Title.Label.ForeColor = color;
             formsPlot1.Plot.Axes.Title.Label.FontSize = 32;
 

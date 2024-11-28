@@ -16,7 +16,7 @@ namespace ElectricFieldVis.View
     {
         
         /// <summary>
-        /// Form with statistics.
+        /// Form with DEV statistics.
         /// </summary>
         public StatsForm()
         {

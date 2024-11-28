@@ -128,8 +128,8 @@ namespace ElectricFieldVis.Controller
             ToolStripMenuItem funMode_toggle = new ToolStripMenuItem("Fun Mode OFF");
             funMode_toggle.Name = "fun";
 
-            // add visualy to menu
-            _menuStrip.Items.AddRange([stats, customizer, help, scenario, legend, time, other_probes, funMode_toggle]);
+            // add visually to menu
+            _menuStrip.Items.AddRange([/*stats, */customizer, help, scenario, legend, time, other_probes, funMode_toggle]);
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");

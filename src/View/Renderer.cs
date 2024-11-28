@@ -425,7 +425,7 @@ namespace ElectricFieldVis.View
             using (Brush textBrush = new SolidBrush(Color.Black))
             using (Font font = new Font("Serif", _scale * 0.1f))
             {
-                string chargeLabel = $"{energy.ToString("G3")} N/C";
+                string chargeLabel = $"{(probe != mainProbe ? probe.ID.ToString()+": " : "")}{energy.ToString("G3")} N/C";
                 SizeF textSize = g.MeasureString(chargeLabel, font);
 
                 // draw value background
