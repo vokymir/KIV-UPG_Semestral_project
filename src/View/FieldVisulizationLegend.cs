@@ -98,7 +98,7 @@ namespace ElectricFieldVis.View
                         y);
 
                     // draw label
-                    string label = value.ToString("F1");
+                    string label = value.ToString("F0")+"%";
                     g.DrawString(label,
                         _font,
                         Brushes.Black,

@@ -130,6 +130,7 @@ namespace ElectricFieldVis.Controller
 
             // add visually to menu
             _menuStrip.Items.AddRange([/*stats, */customizer, help, scenario, legend, time, other_probes, funMode_toggle]);
+            /* stats are only DEV info */
 
             // HELP-submenu
             ToolStripMenuItem center = new ToolStripMenuItem("Center");
