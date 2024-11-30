@@ -26,14 +26,6 @@ namespace ElectricFieldVis.Model
             }
         }
 
-        public static void HandleKeyboard(Form form, Renderer rend, KeyEventArgs e)
-        {
-            if (e.Control && e.KeyCode == Keys.Right)
-            {
-                rend.Origin = new Vector2(rend.Origin.X + 50, rend.Origin.Y);
-            }
-        }
-
         public static Color ColorFromHSV(double hue, double saturation, double value)
         {
             int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;

@@ -451,7 +451,6 @@ namespace ElectricFieldVis.Controller
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             Utils.HandleCtrlW(this, e);
-            Utils.HandleKeyboard(this,_renderer,e);
         }
         
         private void MainForm_MouseDown(object? sender, MouseEventArgs e)
