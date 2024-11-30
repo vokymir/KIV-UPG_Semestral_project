@@ -616,7 +616,7 @@ namespace ElectricFieldVis.View
             }
             catch (Exception e)
             {
-                MessageBox.Show("Unreasonably big or small inputs.");
+                //MessageBox.Show("Unreasonably big or small inputs.");
                 Environment.Exit(1);
             }
             

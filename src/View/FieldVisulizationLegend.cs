@@ -55,7 +55,7 @@ namespace ElectricFieldVis.View
                     using (Pen pen = new Pen(color))
                     {
                         for (int x = 0; x < gradientRect.Width; x++)
-                        {
+                        { // i know its slow, but the legend is small and necessarily shown
                             gradientBitmap.SetPixel(x, y, color);
                         }
                     }

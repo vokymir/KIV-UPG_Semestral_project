@@ -17,6 +17,15 @@ namespace ElectricFieldVis.Controller
 
         public string InputText => txtInput.Text;
 
+        /// <summary>
+        /// Returns empty string if InputBox failed to receive input - e.g. when user clicks X instead of OK.
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="position"></param>
+        /// <param name="defaultText"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
         public static string Show(string title, Point position, string defaultText = "", int width = 200, int height = 10)
         {
             using (var inputBox = new InputBox(title,width,height, defaultText))
