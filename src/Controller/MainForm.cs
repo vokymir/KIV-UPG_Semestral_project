@@ -39,6 +39,8 @@ namespace ElectricFieldVis.Controller
 
         #endregion declarations
 
+        #region init
+
         /// <summary>
         /// Init MainForms components - Model, View, Controller and WinForm itself.
         /// </summary>
@@ -66,8 +68,6 @@ namespace ElectricFieldVis.Controller
             this.drawingPanel.MouseUp += MainForm_MouseUp;
             this.drawingPanel.MouseWheel += MainForm_MouseWheel;
         }
-
-        #region init
 
         /// <summary>
         /// Init Model by loading scenario and creating new main Probe.
@@ -467,12 +467,13 @@ namespace ElectricFieldVis.Controller
                 // left button is multi-useful
                 Particle? the_one = WasParticleClicked(e);
                 Probe? the_probe = WasProbeClicked(e);
-                if (the_one != null)
-                { // either click on particle
-                    HandleParticleOnClick(e, the_one);
-                }else if (the_probe != null)
-                { // or on probe
+                if (the_probe != null)
+                { // either click on probe (has prevalence)
                     HandleProbeOnClick(e, the_probe);
+                }
+                else if (the_one != null)
+                { // or on particle
+                    HandleParticleOnClick(e, the_one); 
                 }
                 else
                 { // or elsewhere
